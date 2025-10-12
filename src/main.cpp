@@ -236,60 +236,6 @@ namespace fem{
     
 }
 
-// gauss quadrature
-// 1 dimension
-// 2 points
-// domain [-1; 1]
-inline double gauss_quad_1d_2p(double (*f)(double)){
-    // 1/sqrt(3)
-    constexpr double x0 = 0.57735026918962584;
-    // weights = 1
-    return (f(x0) + f(-x0));
-}
-
-// gauss quadrature
-// 1 dimension
-// 3 points
-// domain [-1; 1]
-inline double gauss_quad_1d_3p(double (*f)(double)){
-    // sqrt(3/5)
-    constexpr double x0 = 0.77459666924148340;
-    constexpr double x1 = 0;
-    // weights
-    constexpr double w0 = 5.0 / 9.0;
-    constexpr double w1 = 8.0 / 9.0;
-
-    return w0*(f(x0) + f(-x0)) + w1*f(x1);
-}
-
-
-
-inline double gauss_quad_2d_2p(double (*f)(double, double)){
-    // 1/sqrt(3)
-    constexpr double x0 = 0.57735026918962584;
-    // weights = 1
-    return  f(x0, x0) + 
-            f(-x0, -x0) + 
-            f(-x0, x0) + 
-            f(x0, -x0);
-}
-
-const double gauss_quad_points_2[] = {
-    -0.57735026918962584, 1, 
-    0.57735026918962584, 1
-};
-
-const double gauss_quad_points_3[] = {
-    -0.77459666924148340, (5.0 / 9.0),
-    0, 8.0 / 9.0,
-    0.77459666924148340, (5.0 / 9.0)
-};
-
-const double* gauss_quad_point_arrays[]={
-    gauss_quad_points_2,
-    gauss_quad_points_3
-};
-
 class GaussQuad
 {
 private:
