@@ -2,8 +2,11 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <array>
 #include <string>
 #include <iomanip>
+#include <cmath>
+#include <map>
 
 std::string trim(const std::string & source) {
     std::string s(source);
@@ -233,19 +236,152 @@ namespace fem{
     
 }
 
+// gauss quadrature
+// 1 dimension
+// 2 points
+// domain [-1; 1]
+inline double gauss_quad_1d_2p(double (*f)(double)){
+    // 1/sqrt(3)
+    constexpr double x0 = 0.57735026918962584;
+    // weights = 1
+    return (f(x0) + f(-x0));
+}
+
+// gauss quadrature
+// 1 dimension
+// 3 points
+// domain [-1; 1]
+inline double gauss_quad_1d_3p(double (*f)(double)){
+    // sqrt(3/5)
+    constexpr double x0 = 0.77459666924148340;
+    constexpr double x1 = 0;
+    // weights
+    constexpr double w0 = 5.0 / 9.0;
+    constexpr double w1 = 8.0 / 9.0;
+
+    return w0*(f(x0) + f(-x0)) + w1*f(x1);
+}
+
+
+
+inline double gauss_quad_2d_2p(double (*f)(double, double)){
+    // 1/sqrt(3)
+    constexpr double x0 = 0.57735026918962584;
+    // weights = 1
+    return  f(x0, x0) + 
+            f(-x0, -x0) + 
+            f(-x0, x0) + 
+            f(x0, -x0);
+}
+
+const double gauss_quad_points_2[] = {
+    -0.57735026918962584, 1, 
+    0.57735026918962584, 1
+};
+
+const double gauss_quad_points_3[] = {
+    -0.77459666924148340, (5.0 / 9.0),
+    0, 8.0 / 9.0,
+    0.77459666924148340, (5.0 / 9.0)
+};
+
+const double* gauss_quad_point_arrays[]={
+    gauss_quad_points_2,
+    gauss_quad_points_3
+};
+
+class GaussQuad
+{
+private:
+    static const std::array<double, 4> points_2;
+    static const std::array<double, 6> points_3;
+public:
+    static double dim1_pts2(double (*f)(double)){
+        double result = 0;
+        for(int i = 0; i < 2; i++){
+            // result += f(x_i) * w_i
+            result += f(points_2[2*i]) * points_2[2*i+1];
+        }
+
+        return result;
+    };
+
+    static double dim1_pts3(double (*f)(double)){
+        double result = 0;
+        for(int i = 0; i < 3; i++){
+            // result += f(x_i) * w_i
+            result += f(points_3[2*i]) * points_3[2*i+1];
+        }
+        return result;
+    };
+
+    static double dim2_pts2(double (*f)(double, double)){
+        double result = 0;
+        for(int i = 0; i < 2; i++){
+            for(int j = 0; j < 2; j++){
+                //              value    *   area
+                // result += f(x_i, x_j) * w_i * w_j
+                result += f(points_2[2*i], points_2[2*j]) * points_2[2*i+1] * points_2[2*j+1];
+            }
+        }
+        return result;
+    };
+
+    static double dim2_pts3(double (*f)(double, double)){
+        double result = 0;
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                //              value    *   area
+                // result += f(x_i, x_j) * w_i * w_j
+                result += f(points_3[2*i], points_3[2*j]) * points_3[2*i+1] * points_3[2*j+1];
+            }
+        }
+        return result;
+    };
+};
+
+const std::array<double, 4> GaussQuad::points_2 = {
+        -0.57735026918962584, 1, 
+        0.57735026918962584, 1
+};
+
+const std::array<double, 6> GaussQuad::points_3 = {
+    -0.77459666924148340, (5.0 / 9.0),
+    0, 8.0 / 9.0,
+    0.77459666924148340, (5.0 / 9.0)
+};
+
+
+double f1(double x){
+    return 5*pow(x,2) + 3*x + 6;
+}
+
+double f2(double x, double y){
+    return 5*pow(x,2)*pow(y,2) + 3*x*y + 6;
+}
+
+double f_test(double x){
+    return 1;
+}
+
 int main(int argc, char const *argv[])
 {
-    /* code */
-    fem::GlobalData global_data;
-    fem::Grid grid;
 
-    const std::string data_file_path = "./grid_data/Test1_4_4.txt";
+    // fem::GlobalData global_data;
+    // fem::Grid grid;
 
-    fem::load_data_from_file(data_file_path, global_data, grid);
+    // const std::string data_file_path = "./grid_data/Test1_4_4.txt";
 
-    global_data.print();
+    // fem::load_data_from_file(data_file_path, global_data, grid);
 
-    grid.print();
+    // global_data.print();
+    // grid.print();
+
+    // printf("%lf\n", GaussQuad::dim1_pts2(f_test));
+    printf("%lf\n", GaussQuad::dim1_pts2(f1));
+    printf("%lf\n", GaussQuad::dim1_pts3(f1));
+    printf("%lf\n", GaussQuad::dim2_pts2(f2));
+    printf("%lf\n", GaussQuad::dim2_pts3(f2));
 
     return 0;
 }
