@@ -37,6 +37,32 @@ std::vector<std::string> split_str(std::string line, char delimiter = ' '){
     return words;
 }
 
+class Jacobian{
+public:
+    std::vector<std::array<double, 4>> J;
+    std::vector<std::array<double, 4>> J_1;
+    double detJ;
+
+    void print(){
+        printf("Jacobian:\n");
+        printf("dx_dKsi, dy_dKsi, dx_dEta, dy_dEta\n");
+        for(auto &el : J){
+            // dla każdego punktu całkowania
+            printf("%lf, %lf, %lf, %lf\n", el[0], el[1], el[2], el[3]);
+        }
+
+        printf("Jacobian Odwrocony:\n");
+        printf("dy_dEta, -dy_dKsi, -dx_dEta, dx_dKsi\n");
+        for(auto &el : J_1){
+            // dla każdego punktu całkowania
+            printf("%lf, %lf, %lf, %lf\n", el[0], el[1], el[2], el[3]);
+        }
+
+        printf("Wyznacznik Jacobianu:\n");
+        printf("%lf:\n", detJ);
+    }
+};
+
 namespace fem{
     // 2D point
     // id = index-in-array + 1 (counter starting from 1)
@@ -65,6 +91,8 @@ namespace fem{
         int id;
 
         int node_ids[4];
+
+        Jacobian jacobian;
 
         void print(){
             std::cout << "Element4: {\nid: " << this->id << ",\n";
@@ -236,13 +264,32 @@ namespace fem{
     
 }
 
+class UniversalElement4{
+public:
+    double dN_dKsi[4][4] = {0};   // X
+    double dN_dEta[4][4] = {0};   // Y
+
+    void print(){
+        printf("dN_dKsi:\n");
+        for(int i = 0; i < 4; i++)
+            printf("%lf, %lf, %lf, %lf\n", dN_dKsi[i][0], dN_dKsi[i][1], dN_dKsi[i][2], dN_dKsi[i][3]);
+
+        printf("dN_dEta:\n");
+        for(int i = 0; i < 4; i++)
+            printf("%lf, %lf, %lf, %lf\n", dN_dEta[i][0], dN_dEta[i][1], dN_dEta[i][2], dN_dEta[i][3]);
+    }
+};
+
 class GaussQuad
 {
-private:
+// private:
+public:
     static const std::array<double, 4> points_2;
     static const std::array<double, 6> points_3;
     static const std::array<double, 8> points_4;
-public:
+
+    static UniversalElement4 uniEl;
+
     static double dim1_pts2(double (*f)(double)){
         double result = 0;
         for(int i = 0; i < 2; i++){
@@ -306,6 +353,24 @@ public:
         }
         return result;
     };
+
+    static void init_universal_element(){
+        for(int i_ksi = 0; i_ksi < 2; i_ksi++){
+            for(int i_eta = 0; i_eta < 2; i_eta++){
+                double ksi = points_2[2*i_ksi];
+                double eta = points_2[2*i_eta];
+                uniEl.dN_dKsi[2*i_ksi+i_eta][0] = -0.25*(1-eta);
+                uniEl.dN_dKsi[2*i_ksi+i_eta][1] = 0.25*(1-eta);
+                uniEl.dN_dKsi[2*i_ksi+i_eta][2] = 0.25*(1+eta);
+                uniEl.dN_dKsi[2*i_ksi+i_eta][3] = -0.25*(1+eta);
+    
+                uniEl.dN_dEta[2*i_ksi+i_eta][0] = -0.25*(1-ksi);
+                uniEl.dN_dEta[2*i_ksi+i_eta][1] = -0.25*(1+ksi);
+                uniEl.dN_dEta[2*i_ksi+i_eta][2] = 0.25*(1+ksi);
+                uniEl.dN_dEta[2*i_ksi+i_eta][3] = 0.25*(1-ksi);
+            }
+        }
+    }
 };
 
 const std::array<double, 4> GaussQuad::points_2 = {
@@ -326,6 +391,8 @@ const std::array<double, 8> GaussQuad::points_4 = {
     -0.861136, 0.347855
 };
 
+UniversalElement4 GaussQuad::uniEl;
+
 double f1(double x){
     return 5*pow(x,2) + 3*x + 6;
 }
@@ -338,24 +405,107 @@ double f_test(double x){
     return 1;
 }
 
+
+
 int main(int argc, char const *argv[])
 {
+    // wybór metody całkowania
+    // ilość punktów i dimension
+    // Gauss.points = 2
 
-    // fem::GlobalData global_data;
-    // fem::Grid grid;
+    // init
+    // policzenie stałych dla metody całkowania
+    // Gauss.init
 
-    // const std::string data_file_path = "./grid_data/Test1_4_4.txt";
+    // reszta programu
 
-    // fem::load_data_from_file(data_file_path, global_data, grid);
 
-    // global_data.print();
-    // grid.print();
+    // 2 POINTS 2D
+    // Ksi <==> X
+    // Eta <==> Y
+    // N1 = 0.25*(1-Psi)*(1-Eta)
+    // N2 = 0.25*(1+Psi)*(1-Eta)
+    // N3 = 0.25*(1+Psi)*(1+Eta)
+    // N4 = 0.25*(1-Psi)*(1+Eta)
 
-    // printf("%lf\n", GaussQuad::dim1_pts2(f_test));
-    printf("%lf\n", GaussQuad::dim1_pts2(f1));
-    printf("%lf\n", GaussQuad::dim1_pts3(f1));
-    printf("%lf\n", GaussQuad::dim2_pts2(f2));
-    printf("%lf\n", GaussQuad::dim2_pts3(f2));
+    // N1/dKsi = -0.25*(1-Eta)
+    // N2/dKsi = 0.25*(1-Eta)
+    // N3/dKsi = 0.25*(1+Eta)
+    // N4/dKsi = -0.25*(1+Eta)
+
+    // N1/dEta = -0.25*(1-Ksi)
+    // N2/dEta = -0.25*(1+Ksi)
+    // N3/dEta = 0.25*(1+Ksi)
+    // N4/dEta = 0.25*(1-Ksi)
+    GaussQuad::init_universal_element();
+    GaussQuad::uniEl.print();
+
+    fem::GlobalData global_data;
+    fem::Grid grid;
+
+    const std::string data_file_path = "./grid_data/Test1_4_4.txt";
+
+    fem::load_data_from_file(data_file_path, global_data, grid);
+
+    global_data.print();
+    grid.print();
+
+    for(auto &element : grid.elements){
+        element.jacobian.J.clear();
+        element.jacobian.J.reserve(4);
+        element.jacobian.J_1.clear();
+        element.jacobian.J_1.reserve(4);
+
+        for(int i = 0; i < 4; i++){
+            element.jacobian.J.push_back(std::array<double, 4>());
+            element.jacobian.J_1.push_back(std::array<double, 4>());
+        }
+
+        for(int i_ksi = 0; i_ksi < 2; i_ksi++){
+            for(int i_eta = 0; i_eta < 2; i_eta++){
+                // dla każdego punktu całkowania [2*i_ksi + i_eta]
+                double dx_dKsi = 0;
+                double dx_dEta = 0;
+                for(int i = 0; i < 4; i++){
+                    // x * dN_i/dKsi
+                    dx_dKsi += grid.nodes[element.node_ids[i]-1].x * GaussQuad::uniEl.dN_dKsi[2*i_ksi + i_eta][i];
+                    // x * dN_i/dEta
+                    dx_dEta += grid.nodes[element.node_ids[i]-1].x * GaussQuad::uniEl.dN_dEta[2*i_ksi + i_eta][i];
+                }
+
+                double dy_dKsi = 0;
+                double dy_dEta = 0;
+                for(int i = 0; i < 4; i++){
+                    // y * dN_i/dKsi
+                    dy_dKsi += grid.nodes[element.node_ids[i]-1].y * GaussQuad::uniEl.dN_dKsi[2*i_ksi + i_eta][i];
+                    // y * dN_i/dEta
+                    dy_dEta += grid.nodes[element.node_ids[i]-1].y * GaussQuad::uniEl.dN_dEta[2*i_ksi + i_eta][i];
+                }
+
+                // jakobian
+                element.jacobian.J[2*i_ksi + i_eta][0] = dx_dKsi;
+                element.jacobian.J[2*i_ksi + i_eta][1] = dy_dKsi;
+                element.jacobian.J[2*i_ksi + i_eta][2] = dx_dEta;
+                element.jacobian.J[2*i_ksi + i_eta][3] = dy_dEta;
+
+                // det J
+                element.jacobian.detJ = dx_dKsi * dy_dEta - (dy_dKsi * dx_dEta);
+                double detJ = dx_dKsi * dy_dEta - (dy_dKsi * dx_dEta);
+                // odwórcoy
+                element.jacobian.J_1[2*i_ksi + i_eta][0] = dy_dEta / detJ;
+                element.jacobian.J_1[2*i_ksi + i_eta][1] = -dy_dKsi / detJ;
+                element.jacobian.J_1[2*i_ksi + i_eta][2] = -dx_dEta / detJ;
+                element.jacobian.J_1[2*i_ksi + i_eta][3] = dx_dKsi / detJ;
+
+            }
+        }
+    }
+
+    for(auto &element: grid.elements){
+        element.jacobian.print();
+        printf("\n");
+    }
+
 
     return 0;
 }
