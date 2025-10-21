@@ -503,7 +503,37 @@ int main(int argc, char const *argv[])
 
     for(auto &element: grid.elements){
         element.jacobian.print();
+        
+        // dla każdego punktu całkowania
+        for(int i_ksi = 0; i_ksi < 2; i_ksi++){
+            for(int i_eta = 0; i_eta < 2; i_eta++){
+                std::array<double, 4> dNi_dx;
+                std::array<double, 4> dNi_dy;
+
+                for(int i = 0; i < 4; i++){
+                    // dN/dx
+                    double dN_dx = 
+                    element.jacobian.J_1[2*i_ksi + i_eta][0] * GaussQuad::uniEl.dN_dKsi[2*i_ksi + i_eta][i] +
+                    element.jacobian.J_1[2*i_ksi + i_eta][1] * GaussQuad::uniEl.dN_dEta[2*i_ksi + i_eta][i];
+                    dNi_dx[i] = dN_dx;
+
+                    // dN/dy
+                    double dN_dy = 
+                    element.jacobian.J_1[2*i_ksi + i_eta][2] * GaussQuad::uniEl.dN_dKsi[2*i_ksi + i_eta][i] +
+                    element.jacobian.J_1[2*i_ksi + i_eta][3] * GaussQuad::uniEl.dN_dEta[2*i_ksi + i_eta][i];
+                    dNi_dy[i] = dN_dy;
+                }
+
+                printf("dla %d punktu całkowania:\n", 2*i_ksi + i_eta);
+                printf("dNi/dx:\n");
+                printf("%lf, %lf, %lf, %lf\n", dNi_dx[0], dNi_dx[1], dNi_dx[2], dNi_dx[3]);
+                printf("dNi/dy:\n");
+                printf("%lf, %lf, %lf, %lf\n", dNi_dy[0], dNi_dy[1], dNi_dy[2], dNi_dy[3]);
+            }
+        }
+
         printf("\n");
+
     }
 
 
