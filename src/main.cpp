@@ -241,6 +241,7 @@ class GaussQuad
 private:
     static const std::array<double, 4> points_2;
     static const std::array<double, 6> points_3;
+    static const std::array<double, 8> points_4;
 public:
     static double dim1_pts2(double (*f)(double)){
         double result = 0;
@@ -257,6 +258,15 @@ public:
         for(int i = 0; i < 3; i++){
             // result += f(x_i) * w_i
             result += f(points_3[2*i]) * points_3[2*i+1];
+        }
+        return result;
+    };
+
+    static double dim1_pts4(double (*f)(double)){
+        double result = 0;
+        for(int i = 0; i < 4; i++){
+            // result += f(x_i) * w_i
+            result += f(points_4[2*i]) * points_4[2*i+1];
         }
         return result;
     };
@@ -284,6 +294,18 @@ public:
         }
         return result;
     };
+
+    static double dim2_pts4(double (*f)(double, double)){
+        double result = 0;
+        for(int i = 0; i < 4; i++){
+            for(int j = 0; j < 4; j++){
+                //              value    *   area
+                // result += f(x_i, x_j) * w_i * w_j
+                result += f(points_4[2*i], points_4[2*j]) * points_4[2*i+1] * points_4[2*j+1];
+            }
+        }
+        return result;
+    };
 };
 
 const std::array<double, 4> GaussQuad::points_2 = {
@@ -297,6 +319,12 @@ const std::array<double, 6> GaussQuad::points_3 = {
     0.77459666924148340, (5.0 / 9.0)
 };
 
+const std::array<double, 8> GaussQuad::points_4 = {
+    0.861136, 0.347855,
+    0.339981, 0.652145,
+    -0.339981, 0.652145,
+    -0.861136, 0.347855
+};
 
 double f1(double x){
     return 5*pow(x,2) + 3*x + 6;
