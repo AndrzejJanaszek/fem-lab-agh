@@ -94,6 +94,11 @@ namespace fem{
 
         Jacobian jacobian;
 
+        double H[4][4];
+
+        std::array<std::array<double, 4>, 4> dN_dX;
+        std::array<std::array<double, 4>, 4> dN_dY;
+
         void print(){
             std::cout << "Element4: {\nid: " << this->id << ",\n";
             std::cout << "node_ids: [";
@@ -405,51 +410,8 @@ double f_test(double x){
     return 1;
 }
 
-
-
-int main(int argc, char const *argv[])
-{
-    // wybór metody całkowania
-    // ilość punktów i dimension
-    // Gauss.points = 2
-
-    // init
-    // policzenie stałych dla metody całkowania
-    // Gauss.init
-
-    // reszta programu
-
-
-    // 2 POINTS 2D
-    // Ksi <==> X
-    // Eta <==> Y
-    // N1 = 0.25*(1-Psi)*(1-Eta)
-    // N2 = 0.25*(1+Psi)*(1-Eta)
-    // N3 = 0.25*(1+Psi)*(1+Eta)
-    // N4 = 0.25*(1-Psi)*(1+Eta)
-
-    // N1/dKsi = -0.25*(1-Eta)
-    // N2/dKsi = 0.25*(1-Eta)
-    // N3/dKsi = 0.25*(1+Eta)
-    // N4/dKsi = -0.25*(1+Eta)
-
-    // N1/dEta = -0.25*(1-Ksi)
-    // N2/dEta = -0.25*(1+Ksi)
-    // N3/dEta = 0.25*(1+Ksi)
-    // N4/dEta = 0.25*(1-Ksi)
-    GaussQuad::init_universal_element();
-    GaussQuad::uniEl.print();
-
-    fem::GlobalData global_data;
-    fem::Grid grid;
-
-    const std::string data_file_path = "./grid_data/Test1_4_4.txt";
-
-    fem::load_data_from_file(data_file_path, global_data, grid);
-
-    global_data.print();
-    grid.print();
-
+// todo refactor
+void calculate_jacobian_and_dN_dX_dY(fem::Grid &grid){
     for(auto &element : grid.elements){
         element.jacobian.J.clear();
         element.jacobian.J.reserve(4);
@@ -502,8 +464,6 @@ int main(int argc, char const *argv[])
     }
 
     for(auto &element: grid.elements){
-        element.jacobian.print();
-        
         // dla każdego punktu całkowania
         for(int i_ksi = 0; i_ksi < 2; i_ksi++){
             for(int i_eta = 0; i_eta < 2; i_eta++){
@@ -524,18 +484,73 @@ int main(int argc, char const *argv[])
                     dNi_dy[i] = dN_dy;
                 }
 
-                printf("dla %d punktu całkowania:\n", 2*i_ksi + i_eta);
-                printf("dNi/dx:\n");
-                printf("%lf, %lf, %lf, %lf\n", dNi_dx[0], dNi_dx[1], dNi_dx[2], dNi_dx[3]);
-                printf("dNi/dy:\n");
-                printf("%lf, %lf, %lf, %lf\n", dNi_dy[0], dNi_dy[1], dNi_dy[2], dNi_dy[3]);
+                element.dN_dX[2*i_ksi + i_eta] = dNi_dx;
+                element.dN_dY[2*i_ksi + i_eta] = dNi_dy;
+                // printf("dla %d punktu całkowania:\n", 2*i_ksi + i_eta);
+                // printf("dNi/dx:\n");
+                // printf("%lf, %lf, %lf, %lf\n", dNi_dx[0], dNi_dx[1], dNi_dx[2], dNi_dx[3]);
+                // printf("dNi/dy:\n");
+                // printf("%lf, %lf, %lf, %lf\n", dNi_dy[0], dNi_dy[1], dNi_dy[2], dNi_dy[3]);
+            }
+        }
+    }
+}
+
+void calculate_H_matrix(fem::Grid &grid, fem::GlobalData &global_data)
+{
+    for (auto &element : grid.elements)
+    {
+        double H[4][4] = {0};
+        // dla kazdego punktu calkowania
+        for (int i_pc = 0; i_pc < 2; i_pc++){
+            for (int j_pc = 0; j_pc < 2; j_pc++){
+
+                for (int row = 0; row < 4; row++){
+                    for (int col = 0; col < 4; col++){
+                        H[row][col] +=
+                        (element.dN_dX[2*i_pc + j_pc][row] * element.dN_dX[2*i_pc + j_pc][col] +
+                        element.dN_dY[2*i_pc + j_pc][row] * element.dN_dY[2*i_pc + j_pc][col]) *
+                        global_data.conductivity * element.jacobian.detJ *
+                        GaussQuad::points_2[2*i_pc+1] * GaussQuad::points_2[2*j_pc+1];
+                    }
+                }
             }
         }
 
-        printf("\n");
-
+        for(int i = 0; i < 4; i++){
+            for(int j = 0; j < 4; j++){
+                element.H[i][j] = H[i][j];
+            }
+        }
     }
+}
 
+int main(int argc, char const *argv[])
+{
+    GaussQuad::init_universal_element();
+    GaussQuad::uniEl.print();
+
+    fem::GlobalData global_data;
+    fem::Grid grid;
+
+    const std::string data_file_path = "./grid_data/Test1_4_4.txt";
+
+    fem::load_data_from_file(data_file_path, global_data, grid);
+
+    global_data.print();
+    grid.print();
+
+    calculate_jacobian_and_dN_dX_dY(grid);
+
+    calculate_H_matrix(grid, global_data);
+
+    
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            printf("%lf ", grid.elements[0].H[i][j]);
+        }
+        printf("\n");
+    }
 
     return 0;
 }
