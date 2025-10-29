@@ -525,6 +525,32 @@ void calculate_H_matrix(fem::Grid &grid, fem::GlobalData &global_data)
     }
 }
 
+void calculate_HG_matrix(fem::Grid &grid, fem::GlobalData &global_data){    
+    // inicjalizacja GH z wartościami 0
+    std::vector<std::vector<double>> GH(grid.node_number, std::vector<double>(grid.node_number, 0));
+
+    for (auto &element : grid.elements)
+    {
+        // dla każdego node'a elementu
+        for (int row = 0; row < 4; row++){
+            for (int col = 0; col < 4; col++){
+                int row_node_id = element.node_ids[row]-1;
+                int col_node_id = element.node_ids[col]-1;
+
+                GH[row_node_id][col_node_id] += element.H[row][col];
+            }
+        }
+    }
+
+    printf("\n");
+    for(int i = 0; i < grid.node_number; i++){
+        for(int j = 0; j < grid.node_number; j++){
+            printf("%lf ", GH[i][j]);
+        }
+        printf("\n");
+    }
+}
+
 int main(int argc, char const *argv[])
 {
     GaussQuad::init_universal_element();
@@ -544,13 +570,15 @@ int main(int argc, char const *argv[])
 
     calculate_H_matrix(grid, global_data);
 
+    calculate_HG_matrix(grid, global_data);
+
     
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
-            printf("%lf ", grid.elements[0].H[i][j]);
-        }
-        printf("\n");
-    }
+    // for(int i = 0; i < 4; i++){
+    //     for(int j = 0; j < 4; j++){
+    //         printf("%lf ", grid.elements[0].H[i][j]);
+    //     }
+    //     printf("\n");
+    // }
 
     return 0;
 }
