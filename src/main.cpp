@@ -121,6 +121,8 @@ namespace fem{
 
         std::vector<int> border_condition_node_ids;
 
+        std::vector<std::vector<double>> HG;
+
         void print(){
             std::cout << " --- GRID DATA PRINT --- : " << "\n";
             std::cout << "node_number: " << this->node_number<< "\n";
@@ -522,6 +524,15 @@ void calculate_H_matrix(fem::Grid &grid, fem::GlobalData &global_data)
                 element.H[i][j] = H[i][j];
             }
         }
+    }
+}
+
+void calculate_HG_matrix(fem::Grid &grid, fem::GlobalData &global_data){
+    grid.HG.clear();
+    grid.HG.reserve(grid.node_number);
+
+    for(int i = 0; i < grid.node_number; i++){
+        std::vector<double> asd(grid.node_number, 0);
     }
 }
 
