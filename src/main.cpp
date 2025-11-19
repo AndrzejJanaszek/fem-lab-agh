@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <cmath>
 #include <map>
+#include <algorithm>
 
 std::string trim(const std::string & source) {
     std::string s(source);
@@ -73,12 +74,14 @@ namespace fem{
 
         double x;
         double y;
+        bool isBC = false;
 
         void print() {
             std::cout << "Node: { ";
             std::cout << "id: " << std::setw(5) << std::right << this->id << ", ";
             std::cout << "x: " << std::setw(10) << std::fixed << std::setprecision(4) << this->x << ", ";
             std::cout << "y: " << std::setw(10) << std::fixed << std::setprecision(4) << this->y;
+            std::cout << "isBC: " << std::setw(10) << this->isBC;
             std::cout << " }\n";
         }
     };
@@ -88,6 +91,21 @@ namespace fem{
     class Element4
     {
         public:
+        
+        class Edge{
+            public:
+            int node_id_1;
+            int node_id_2;
+            int edge_index;
+
+            Edge(){}
+
+            Edge(int node_id_1,int node_id_2,int edge_index){
+                this->node_id_1 = node_id_1;
+                this->node_id_2 = node_id_2;
+                this->edge_index = edge_index;
+            }
+        };
         int id;
 
         int node_ids[4];
@@ -96,8 +114,14 @@ namespace fem{
 
         double H[4][4];
 
+        std::vector<Edge> bc_edges;
+
         std::array<std::array<double, 4>, 4> dN_dX;
         std::array<std::array<double, 4>, 4> dN_dY;
+
+        // todo N1 .. N4 dla punktów na edgach
+        // 4 * npc * 4
+        // std::vector< std::vector< double > >
 
         void print(){
             std::cout << "Element4: {\nid: " << this->id << ",\n";
@@ -267,6 +291,33 @@ namespace fem{
 
         // *close file
         file.close();
+
+        // set BC nodes
+        for (auto& node : grid.nodes) {
+            node.isBC = std::find(
+                grid.border_condition_node_ids.begin(),
+                grid.border_condition_node_ids.end(),
+                node.id
+            ) != grid.border_condition_node_ids.end();
+        }
+
+
+        for(auto& element : grid.elements){
+            // dla każdej krawędzi
+            for(int edge_index = 0; edge_index < 4; edge_index++){
+                // czy node 1 i node 2 są BC
+                int n1 = element.node_ids[edge_index];
+                int n2 = element.node_ids[(edge_index+1)%4];
+                bool is_node_1_bc = std::find(grid.border_condition_node_ids.begin(), grid.border_condition_node_ids.end(), n1) != grid.border_condition_node_ids.end();
+                bool is_node_2_bc = std::find(grid.border_condition_node_ids.begin(), grid.border_condition_node_ids.end(), n2) != grid.border_condition_node_ids.end();
+
+                // jeżeli oba są => dodaj krawędz do listy krawędzi BC w elemencie
+                if(is_node_1_bc && is_node_2_bc){
+                    element.bc_edges.push_back(Element4::Edge(n1, n2, edge_index));
+                }
+            }
+
+        }
     }
     
 }
@@ -275,6 +326,25 @@ class UniversalElement4{
 public:
     double dN_dKsi[4][4] = {0};   // X
     double dN_dEta[4][4] = {0};   // Y
+
+
+    static std::array< std::vector< std::array<double,4> >,4>arr;
+
+    // edge_index reprezentuje globalny numer krawędzi
+    // 0: ma node pierwszy i drugi
+    // 1: ma node drugi i trzeci itd.
+
+    // class Surface{
+    //     public:
+    //     // todo dla zdefiniowanej liczby npc
+    //     // dla 2 punktów całkowania
+    //     std::array<std::vector<double>, 2> N_values_for_npc;
+        
+        
+    // }
+
+    // key: id edge'a, key: id punktu calkowania, wektor Ni dla danego punktu całkowania na krawędzi
+    // static std::map<int, std::map<int, std::vector<double>>> N_values_for_edge_points;
 
     void print(){
         printf("dN_dKsi:\n");
@@ -527,7 +597,7 @@ void calculate_H_matrix(fem::Grid &grid, fem::GlobalData &global_data)
     }
 }
 
-void calculate_HG_matrix(fem::Grid &grid, fem::GlobalData &global_data){    
+void calculate_HG_matrix(fem::Grid &grid){    
     // inicjalizacja GH z wartościami 0
     std::vector<std::vector<double>> GH(grid.node_number, std::vector<double>(grid.node_number, 0));
 
@@ -553,8 +623,54 @@ void calculate_HG_matrix(fem::Grid &grid, fem::GlobalData &global_data){
     }
 }
 
+void calculate_HBC(fem::Grid &grid){
+    for(auto& element : grid.elements){
+        for(auto& edge : element.bc_edges){
+            
+        }
+    }
+}
+
+void calculate_P(fem::Grid &grid, fem::GlobalData &globalData){
+    for(auto& element : grid.elements){
+        for(auto& edge : element.bc_edges){
+            
+        }
+    }
+}
+
+void init_univElem_bc_edges_N__values(){
+    // edge 0: node 1 and 2
+    // edge 1: node 2 and 3 etc.
+    for(int edge_index = 0; edge_index < 4; edge_index++){
+        // dla kazdego punktu całkowania
+        for(int npc = 0; npc < 2; npc++){
+            std::array<double,4> N_arr;
+            // wartość dla nie zerowej współrzędnej
+            double x_ksi = GaussQuad::points_2[npc*2];
+            double y_eta = GaussQuad::points_2[npc*2];
+            // dla edge_index 0 i 2 zerują się wartości pionowe (y)
+            // dla edge_index 1 i 3 zerują sie wartości horyzontalne (x)
+            if(edge_index % 2 == 0){
+                y_eta = 0;
+            }
+            else{
+                x_ksi = 0;
+            }
+
+            N_arr[0] = 0.25*(1-x_ksi)*(1-y_eta);
+            N_arr[1] = 0.25*(1+x_ksi)*(1-y_eta);
+            N_arr[2] = 0.25*(1+x_ksi)*(1+y_eta);
+            N_arr[3] = 0.25*(1-x_ksi)*(1+y_eta);
+
+            UniversalElement4::arr[edge_index].push_back(N_arr);
+        }
+    }
+}
+
 int main(int argc, char const *argv[])
 {
+    printf("test");
     GaussQuad::init_universal_element();
     GaussQuad::uniEl.print();
 
@@ -565,6 +681,8 @@ int main(int argc, char const *argv[])
 
     fem::load_data_from_file(data_file_path, global_data, grid);
 
+    init_univElem_bc_edges_N__values();
+
     global_data.print();
     grid.print();
 
@@ -572,7 +690,7 @@ int main(int argc, char const *argv[])
 
     calculate_H_matrix(grid, global_data);
 
-    calculate_HG_matrix(grid, global_data);
+    calculate_HG_matrix(grid);
 
     
     // for(int i = 0; i < 4; i++){
