@@ -90,6 +90,8 @@ class Element4
     Jacobian jacobian;
 
     double H[4][4];
+    double HBC[4][4];
+    double P[4];
 
     std::vector<Edge> bc_edges;
 
