@@ -159,13 +159,33 @@ void calculate_HG_matrix(Grid &grid){
     //     printf("\n");
     // }
 }
-
-void calculate_HBC(Grid &grid, int npc = 2){
+template<size_t N>
+void calculate_HBC(Grid &grid, GlobalData& globalData, const std::array<double, N> &points, int npc = 2){
+    
     for(auto& element : grid.elements){
+        double arrrr[4][4];
         for(auto& edge : element.bc_edges){
-            // dla każdego punjktu całkowania na krawędzi
+            // dla każdego punjktu całkowania na krawędzi (1D wiec tylko npc a nie npc*npc)
             for(int i = 0; i < npc; i++){
+                // waga punktu całkowania
+                double w = points[2*i+1];
+                
+                for(int row = 0; row < 4; row++){
+                    for(int col = 0; col < 4; col++){
+                        arrrr[row][col] = 
+                        // arrrr[row][col] += 
+                        // printf("edge: %lf %lf %lf %lf \n")
+                        UniversalElement4::edges_N_values[edge.edge_index][i][row] *
+                        UniversalElement4::edges_N_values[edge.edge_index][i][col] *
+                        w *
+                        globalData.alpha *
+                        element.jacobian.detJ;
 
+                        printf("%lf ", arrrr[row][col]);
+                    }
+                    printf("\n");
+                }
+                printf("\n");
             }
         }
     }
@@ -204,7 +224,7 @@ int main(int argc, char const *argv[])
 
     calculate_HG_matrix(grid);
 
-    
+    calculate_HBC(grid, global_data, GaussQuad::points_2, 2);
 
     return 0;
 }

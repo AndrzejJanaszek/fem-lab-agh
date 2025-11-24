@@ -141,11 +141,22 @@ void init_univElem_bc_edges_N_values(const std::array<double, N> &points, int np
             double y_eta = points[i*2];
             // dla edge_index 0 i 2 zerują się wartości pionowe (y)
             // dla edge_index 1 i 3 zerują sie wartości horyzontalne (x)
-            if(edge_index % 2 == 0){
-                y_eta = 0;
-            }
-            else{
-                x_ksi = 0;
+            switch (edge_index)
+            {
+            case 0:
+                y_eta = -1;
+                break;
+            case 1:
+                x_ksi = 1;
+                break;
+            case 2:
+                y_eta = 1;
+            case 3:
+                x_ksi = -1;
+                break;
+                break;
+            default:
+                break;
             }
 
             N_arr[0] = 0.25*(1-x_ksi)*(1-y_eta);
