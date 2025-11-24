@@ -328,7 +328,7 @@ public:
     double dN_dEta[4][4] = {0};   // Y
 
 
-    static std::array< std::vector< std::array<double,4> >,4>arr;
+    static std::array< std::vector< std::array<double,4> >,4>edges_N_values;
 
     // edge_index reprezentuje globalny numer krawędzi
     // 0: ma node pierwszy i drugi
@@ -639,7 +639,7 @@ void calculate_P(fem::Grid &grid, fem::GlobalData &globalData){
     }
 }
 
-void init_univElem_bc_edges_N__values(){
+void init_univElem_bc_edges_N_values(){
     // edge 0: node 1 and 2
     // edge 1: node 2 and 3 etc.
     for(int edge_index = 0; edge_index < 4; edge_index++){
@@ -663,7 +663,7 @@ void init_univElem_bc_edges_N__values(){
             N_arr[2] = 0.25*(1+x_ksi)*(1+y_eta);
             N_arr[3] = 0.25*(1-x_ksi)*(1+y_eta);
 
-            UniversalElement4::arr[edge_index].push_back(N_arr);
+            UniversalElement4::edges_N_values[edge_index].push_back(N_arr);
         }
     }
 }
@@ -681,7 +681,7 @@ int main(int argc, char const *argv[])
 
     fem::load_data_from_file(data_file_path, global_data, grid);
 
-    init_univElem_bc_edges_N__values();
+    init_univElem_bc_edges_N_values();
 
     global_data.print();
     grid.print();
