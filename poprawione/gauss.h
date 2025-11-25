@@ -151,9 +151,9 @@ void init_univElem_bc_edges_N_values(const std::array<double, N> &points, int np
                 break;
             case 2:
                 y_eta = 1;
+                break;
             case 3:
                 x_ksi = -1;
-                break;
                 break;
             default:
                 break;
