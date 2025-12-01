@@ -12,6 +12,7 @@
 
 #include "model.h"
 #include "gauss.h"
+#include "solver.h"
 
 // założenia programu:
 // element 4 węzłowy
@@ -104,22 +105,41 @@ void calculate_jacobian_and_dN_dX_dY(Grid &grid, int npc = 2){
     }
 }
 
-void calculate_H_matrix(Grid &grid, GlobalData &global_data, int npc = 2)
+template<size_t N>
+void calculate_H_matrix(Grid &grid, GlobalData &global_data, const std::array<double, N> &points, int npc = 2)
 {
     for (auto &element : grid.elements)
     {
         double H[4][4] = {0};
+        double C[4][4] = {0};
 
         // dla kazdego punktu calkowania
         for (int i_pc = 0; i_pc < npc; i_pc++){
             for (int j_pc = 0; j_pc < npc; j_pc++){
+                // todo liczyc raz gdzieś indziej
+                double N_arr[4] = {0};
+                double x_ksi = points[i_pc*2];
+                double y_eta = points[j_pc*2];
+                N_arr[0] = 0.25*(1-x_ksi)*(1-y_eta);
+                N_arr[1] = 0.25*(1+x_ksi)*(1-y_eta);
+                N_arr[2] = 0.25*(1+x_ksi)*(1+y_eta);
+                N_arr[3] = 0.25*(1-x_ksi)*(1+y_eta);
 
                 for (int row = 0; row < 4; row++){
                     for (int col = 0; col < 4; col++){
+                        // macierz H
                         H[row][col] +=
                         (element.dN_dX[npc*i_pc + j_pc][row] * element.dN_dX[npc*i_pc + j_pc][col] +
                         element.dN_dY[npc*i_pc + j_pc][row] * element.dN_dY[npc*i_pc + j_pc][col]) *
                         global_data.conductivity * element.jacobian.detJ *
+                        GaussQuad::points_2[npc*i_pc+1] * GaussQuad::points_2[npc*j_pc+1];
+                        
+                        // macierz C
+                        C[row][col] +=
+                        (N_arr[row] * N_arr[col] +
+                        N_arr[row] * N_arr[col]) *
+                        global_data.specific_heat * global_data.density *
+                        element.jacobian.detJ *
                         GaussQuad::points_2[npc*i_pc+1] * GaussQuad::points_2[npc*j_pc+1];
                     }
                 }
@@ -129,6 +149,7 @@ void calculate_H_matrix(Grid &grid, GlobalData &global_data, int npc = 2)
         for(int i = 0; i < 4; i++){
             for(int j = 0; j < 4; j++){
                 element.H[i][j] = H[i][j];
+                element.C[i][j] = C[i][j];
             }
         }
     }
@@ -218,6 +239,27 @@ void calculate_P(Grid &grid, GlobalData& globalData, const std::array<double, N>
     }
 }
 
+void agregate(Grid &grid, GlobalData& globalData, EquationData& eqData){
+    for(auto& element : grid.elements){
+        for (int row = 0; row < 4; row++){
+            for (int col = 0; col < 4; col++){
+                eqData.H[element.node_ids[row]-1][element.node_ids[col]-1] = element.H[row][col];
+                eqData.C[element.node_ids[row]-1][element.node_ids[col]-1] = element.C[row][col];
+            }
+            eqData.P[element.node_ids[row]-1] = element.P[row];
+        }
+    }
+}
+
+void print_HG(EquationData ed){
+    printf("HG");
+    for(auto& row : ed.H){
+        for(double& el : row){
+            printf("%lf ", el);
+        }
+        printf("\n");
+    }
+}
 
 int main(int argc, char const *argv[])
 {
@@ -227,23 +269,31 @@ int main(int argc, char const *argv[])
     
     GlobalData global_data;
     Grid grid;
-    
-    printf("test");
-
+    EquationData equationData;
     load_data_from_file(data_file_path, global_data, grid);
-
+    
+    equationData.initMatrixes(global_data.node_number);
+    
+    
     init_univElem_bc_edges_N_values(GaussQuad::points_2, 2);
-
+    
     global_data.print();
     grid.print();
-
+    
     calculate_jacobian_and_dN_dX_dY(grid);
-
-    calculate_H_matrix(grid, global_data);
-
+    
+    calculate_H_matrix(grid, global_data, GaussQuad::points_2, 2);
+    
     calculate_HG_matrix(grid);
-
+    
     calculate_HBC(grid, global_data, GaussQuad::points_2, 2);
+    
+    agregate(grid, global_data, equationData);
+    
+    // #######################################################
+    
+    printf("\n");
+    print_HG(equationData);
 
     return 0;
 }

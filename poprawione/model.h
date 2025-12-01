@@ -91,6 +91,7 @@ class Element4
 
     double H[4][4];
     double HBC[4][4];
+    double C[4][4];
     double P[4];
 
     std::vector<Edge> bc_edges;
@@ -298,3 +299,16 @@ void load_data_from_file(std::string path, GlobalData &global_data, Grid &grid){
 
     }
 }
+
+    class EquationData {
+    public:
+        std::vector<std::vector<double>> H;
+        std::vector<std::vector<double>> C;
+        std::vector<double> P;
+
+        void initMatrixes(int n) {
+            H.assign(n, std::vector<double>(n, 0.0));
+            C.assign(n, std::vector<double>(n, 0.0));
+            P.assign(n, 0.0);
+        }
+    };
