@@ -262,6 +262,23 @@ void agregate(Grid &grid, GlobalData& globalData, EquationData& eqData){
     }
 }
 
+void agregate_time_part(Grid &grid, GlobalData& globalData, EquationData& eqData, std::vector<double> t0){
+    for (int row = 0; row < grid.node_number; row++){
+        for (int col = 0; col < grid.node_number; col++){
+            // dodajemy C/dt
+            eqData.H[row][col] += eqData.C[row][col] / globalData.simulation_step_time;
+        }
+
+        double tmp = 0; // C/dTeta * t0
+        for(int i = 0; i < globalData.node_number; i++){
+            tmp += eqData.C[row][i] * t0[i]; 
+        }
+        tmp /= globalData.simulation_step_time;
+
+        eqData.P[row] += tmp;
+    }
+}
+
 void print_HG(EquationData ed){
     printf("HG\n");
     for(auto& row : ed.H){
@@ -278,7 +295,6 @@ void print_P(EquationData ed){
         printf("%lf ", el);
     }
     printf("\n");
-
 }
 
 
@@ -320,6 +336,17 @@ int main(int argc, char const *argv[])
     print_P(equationData);
 
     auto ttt = solveLinearSystem(equationData.H, equationData.P);
+
+    for(double &t : ttt){
+        printf("%lf ", t);
+    }
+
+    agregate_time_part(grid, global_data, equationData, std::vector<double>(global_data.node_number,global_data.initial_temperature));
+
+    print_HG(equationData);
+    print_P(equationData);
+
+    ttt = solveLinearSystem(equationData.H, equationData.P);
 
     for(double &t : ttt){
         printf("%lf ", t);
