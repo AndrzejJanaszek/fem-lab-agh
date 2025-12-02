@@ -239,20 +239,31 @@ void calculate_P(Grid &grid, GlobalData& globalData, const std::array<double, N>
     }
 }
 
+// agregere local H, C and P; add HBC to H
 void agregate(Grid &grid, GlobalData& globalData, EquationData& eqData){
+    // set every elemnt of H,C and P to zero
+    for (auto& row : eqData.H)
+        std::fill(row.begin(), row.end(), 0.0);
+    for (auto& row : eqData.C)
+        std::fill(row.begin(), row.end(), 0.0);
+    std::fill(eqData.P.begin(), eqData.P.end(), 0.0);
+
     for(auto& element : grid.elements){
         for (int row = 0; row < 4; row++){
             for (int col = 0; col < 4; col++){
-                eqData.H[element.node_ids[row]-1][element.node_ids[col]-1] = element.H[row][col];
-                eqData.C[element.node_ids[row]-1][element.node_ids[col]-1] = element.C[row][col];
+                eqData.H[element.node_ids[row]-1][element.node_ids[col]-1] += element.H[row][col];
+                // dodanie HBC
+                eqData.H[element.node_ids[row]-1][element.node_ids[col]-1] += element.HBC[row][col];
+
+                eqData.C[element.node_ids[row]-1][element.node_ids[col]-1] += element.C[row][col];
             }
-            eqData.P[element.node_ids[row]-1] = element.P[row];
+            eqData.P[element.node_ids[row]-1] += element.P[row];
         }
     }
 }
 
 void print_HG(EquationData ed){
-    printf("HG");
+    printf("HG\n");
     for(auto& row : ed.H){
         for(double& el : row){
             printf("%lf ", el);
@@ -260,6 +271,16 @@ void print_HG(EquationData ed){
         printf("\n");
     }
 }
+
+void print_P(EquationData ed){
+    printf("P:\n");
+    for(double& el : ed.P){
+        printf("%lf ", el);
+    }
+    printf("\n");
+
+}
+
 
 int main(int argc, char const *argv[])
 {
@@ -287,6 +308,8 @@ int main(int argc, char const *argv[])
     calculate_HG_matrix(grid);
     
     calculate_HBC(grid, global_data, GaussQuad::points_2, 2);
+
+    calculate_P(grid, global_data, GaussQuad::points_2, 2);
     
     agregate(grid, global_data, equationData);
     
@@ -294,6 +317,13 @@ int main(int argc, char const *argv[])
     
     printf("\n");
     print_HG(equationData);
+    print_P(equationData);
+
+    auto ttt = solveLinearSystem(equationData.H, equationData.P);
+
+    for(double &t : ttt){
+        printf("%lf ", t);
+    }
 
     return 0;
 }
