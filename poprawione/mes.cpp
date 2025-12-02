@@ -289,6 +289,16 @@ void print_HG(EquationData ed){
     }
 }
 
+void print_C(EquationData ed){
+    printf("C\n");
+    for(auto& row : ed.C){
+        for(double& el : row){
+            printf("%lf ", el);
+        }
+        printf("\n");
+    }
+}
+
 void print_P(EquationData ed){
     printf("P:\n");
     for(double& el : ed.P){
@@ -343,7 +353,8 @@ int main(int argc, char const *argv[])
 
     agregate_time_part(grid, global_data, equationData, std::vector<double>(global_data.node_number,global_data.initial_temperature));
 
-    print_HG(equationData);
+    print_HG(equationData); 
+    print_C(equationData);
     print_P(equationData);
 
     ttt = solveLinearSystem(equationData.H, equationData.P);
