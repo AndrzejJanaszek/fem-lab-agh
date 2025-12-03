@@ -19,7 +19,7 @@ class Jacobian{
 public:
     std::vector<std::array<double, 4>> J;
     std::vector<std::array<double, 4>> J_1;
-    double detJ;
+    std::vector<double> detJ;
 
     void print(){
         printf("Jacobian:\n");

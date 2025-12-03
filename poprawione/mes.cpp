@@ -24,6 +24,8 @@ void calculate_jacobian_and_dN_dX_dY(Grid &grid, int npc = 2){
         element.jacobian.J.reserve(4);
         element.jacobian.J_1.clear();
         element.jacobian.J_1.reserve(4);
+        element.jacobian.detJ.clear();
+        element.jacobian.detJ.reserve(4);
 
         for(int i = 0; i < npc*npc; i++){
             element.jacobian.J.push_back(std::array<double, 4>());
@@ -61,8 +63,8 @@ void calculate_jacobian_and_dN_dX_dY(Grid &grid, int npc = 2){
                 element.jacobian.J[npc*i_ksi + i_eta][3] = dy_dEta;
 
                 // det J
-                element.jacobian.detJ = dx_dKsi * dy_dEta - (dy_dKsi * dx_dEta);
-                double detJ = dx_dKsi * dy_dEta - (dy_dKsi * dx_dEta);
+                element.jacobian.detJ[npc*i_ksi + i_eta] = dx_dKsi * dy_dEta - (dy_dKsi * dx_dEta);
+                double detJ = element.jacobian.detJ[npc*i_ksi + i_eta];
                 // odwórcoy
                 element.jacobian.J_1[npc*i_ksi + i_eta][0] = dy_dEta / detJ;
                 element.jacobian.J_1[npc*i_ksi + i_eta][1] = -dy_dKsi / detJ;
@@ -132,14 +134,14 @@ void calculate_H_and_C_matrix(Grid &grid, GlobalData &global_data, const std::ar
                         H[row][col] +=
                         (element.dN_dX[npc*i_pc + j_pc][row] * element.dN_dX[npc*i_pc + j_pc][col] +
                         element.dN_dY[npc*i_pc + j_pc][row] * element.dN_dY[npc*i_pc + j_pc][col]) *
-                        global_data.conductivity * element.jacobian.detJ *
+                        global_data.conductivity * element.jacobian.detJ[npc*i_pc + j_pc] *
                         GaussQuad::points_2[npc*i_pc+1] * GaussQuad::points_2[npc*j_pc+1];
                         
                         // macierz C
                         C[row][col] +=
                         (N_arr[row] * N_arr[col]) *
                         global_data.specific_heat * global_data.density *
-                        element.jacobian.detJ *
+                        element.jacobian.detJ[npc*i_pc + j_pc] *
                         GaussQuad::points_2[npc*i_pc+1] * GaussQuad::points_2[npc*j_pc+1];
                     }
                 }
@@ -186,18 +188,21 @@ template<size_t N>
 void calculate_HBC(Grid &grid, GlobalData& globalData, const std::array<double, N> &points, int npc = 2){
     
     for(auto& element : grid.elements){
+        //wyzerowanie macierzyt HBC elemntu
+        for(int row = 0; row < 4; row++){
+            for(int col = 0; col < 4; col++){
+                element.HBC[row][col] = 0;
+        }}
         for(auto& edge : element.bc_edges){
             // dla każdego punjktu całkowania na krawędzi (1D wiec tylko npc a nie npc*npc)
             for(int i = 0; i < npc; i++){
                 // waga punktu całkowania
                 double w = points[2*i+1];                
 
-                //wyzerowanie macierzyt HBC elemntu
-                for(int row = 0; row < 4; row++){
-                    for(int col = 0; col < 4; col++){
-                        element.HBC[row][col] = 0;
-                }}
-
+                
+                double dx = grid.nodes[edge.node_id_2-1].x - grid.nodes[edge.node_id_1-1].x;
+                double dy = grid.nodes[edge.node_id_2-1].y - grid.nodes[edge.node_id_1-1].y;
+                double detJ = sqrt(dx*dx + dy*dy)/2.0;
                 for(int row = 0; row < 4; row++){
                     for(int col = 0; col < 4; col++){
                         element.HBC[row][col] += 
@@ -207,7 +212,7 @@ void calculate_HBC(Grid &grid, GlobalData& globalData, const std::array<double, 
                         UniversalElement4::edges_N_values[edge.edge_index][i][col] *
                         w *
                         globalData.alpha *
-                        element.jacobian.detJ;
+                        detJ;
                     }
                 }
             }
@@ -275,8 +280,8 @@ void agregate_time_part(Grid &grid, GlobalData& globalData, EquationData& eqData
         for (int col = 0; col < grid.node_number; col++){
             // dodajemy C/dt
             
-            eqData.H[row][col] += eqData.C[row][col] * (1.0/ 50.0);
-            // eqData.H[row][col] += eqData.C[row][col] / globalData.simulation_step_time;
+            // eqData.H[row][col] += eqData.C[row][col] * (1.0/ 50.0);
+            eqData.H[row][col] += eqData.C[row][col] / globalData.simulation_step_time;
         }
 
         double tmp = 0; // C/dTeta * t0
