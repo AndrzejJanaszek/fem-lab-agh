@@ -105,8 +105,9 @@ void calculate_jacobian_and_dN_dX_dY(Grid &grid, int npc = 2){
     }
 }
 
+// CALCULATE H, C FOR EACH ELEMENT
 template<size_t N>
-void calculate_H_matrix(Grid &grid, GlobalData &global_data, const std::array<double, N> &points, int npc = 2)
+void calculate_H_and_C_matrix(Grid &grid, GlobalData &global_data, const std::array<double, N> &points, int npc = 2)
 {
     for (auto &element : grid.elements)
     {
@@ -136,8 +137,7 @@ void calculate_H_matrix(Grid &grid, GlobalData &global_data, const std::array<do
                         
                         // macierz C
                         C[row][col] +=
-                        (N_arr[row] * N_arr[col] +
-                        N_arr[row] * N_arr[col]) *
+                        (N_arr[row] * N_arr[col]) *
                         global_data.specific_heat * global_data.density *
                         element.jacobian.detJ *
                         GaussQuad::points_2[npc*i_pc+1] * GaussQuad::points_2[npc*j_pc+1];
@@ -155,31 +155,33 @@ void calculate_H_matrix(Grid &grid, GlobalData &global_data, const std::array<do
     }
 }
 
-void calculate_HG_matrix(Grid &grid){    
-    // inicjalizacja GH z wartościami 0
-    std::vector<std::vector<double>> GH(grid.node_number, std::vector<double>(grid.node_number, 0));
+// void calculate_HG_matrix(Grid &grid){    
+//     // inicjalizacja GH z wartościami 0
+//     std::vector<std::vector<double>> GH(grid.node_number, std::vector<double>(grid.node_number, 0));
 
-    for (auto &element : grid.elements)
-    {
-        // dla każdego node'a elementu
-        for (int row = 0; row < 4; row++){
-            for (int col = 0; col < 4; col++){
-                int row_node_id = element.node_ids[row]-1;
-                int col_node_id = element.node_ids[col]-1;
+//     for (auto &element : grid.elements)
+//     {
+//         // dla każdego node'a elementu
+//         for (int row = 0; row < 4; row++){
+//             for (int col = 0; col < 4; col++){
+//                 int row_node_id = element.node_ids[row]-1;
+//                 int col_node_id = element.node_ids[col]-1;
 
-                GH[row_node_id][col_node_id] += element.H[row][col];
-            }
-        }
-    }
+//                 GH[row_node_id][col_node_id] += element.H[row][col];
+//             }
+//         }
+//     }
 
-    // printf("\n");
-    // for(int i = 0; i < grid.node_number; i++){
-    //     for(int j = 0; j < grid.node_number; j++){
-    //         printf("%lf ", GH[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-}
+//     // printf("\n");
+//     // for(int i = 0; i < grid.node_number; i++){
+//     //     for(int j = 0; j < grid.node_number; j++){
+//     //         printf("%lf ", GH[i][j]);
+//     //     }
+//     //     printf("\n");
+//     // }
+// }
+
+// CALCULATE FOR EACH ELEMENT HBC
 template<size_t N>
 void calculate_HBC(Grid &grid, GlobalData& globalData, const std::array<double, N> &points, int npc = 2){
     
@@ -213,33 +215,39 @@ void calculate_HBC(Grid &grid, GlobalData& globalData, const std::array<double, 
     }
 }
 
+// calculate C for each element 
 template<size_t N>
 void calculate_P(Grid &grid, GlobalData& globalData, const std::array<double, N> &points, int npc = 2){
     for(auto& element : grid.elements){
+        // wyzerowanie macierzy (wektora P)
+        for(int row = 0; row < 4; row++)
+            element.P[row] = 0;
+
         for(auto& edge : element.bc_edges){
             // dla każdego punjktu całkowania na krawędzi (1D wiec tylko npc a nie npc*npc)
             for(int i = 0; i < npc; i++){
                 // waga punktu całkowania
                 double w = points[2*i+1];
 
-                // wyzerowanie macierzy (wektora P)
-                for(int row = 0; row < 4; row++)
-                    element.P[row] = 0;
-
+                // dla każdego N
+                double dx = grid.nodes[edge.node_id_2-1].x - grid.nodes[edge.node_id_1-1].x;
+                double dy = grid.nodes[edge.node_id_2-1].y - grid.nodes[edge.node_id_1-1].y;
+                double detJ = sqrt(dx*dx + dy*dy)/2.0;
                 for(int row = 0; row < 4; row++){
                     element.P[row] += 
                     UniversalElement4::edges_N_values[edge.edge_index][i][row] *
                     globalData.tot *
                     w *
                     globalData.alpha *
-                    element.jacobian.detJ;
+                    detJ;
+                    // element.jacobian.detJ;
                 }
             }
         }
     }
 }
 
-// agregere local H, C and P; add HBC to H
+// agregate local H, C and P; add HBC to H
 void agregate(Grid &grid, GlobalData& globalData, EquationData& eqData){
     // set every elemnt of H,C and P to zero
     for (auto& row : eqData.H)
@@ -266,7 +274,9 @@ void agregate_time_part(Grid &grid, GlobalData& globalData, EquationData& eqData
     for (int row = 0; row < grid.node_number; row++){
         for (int col = 0; col < grid.node_number; col++){
             // dodajemy C/dt
-            eqData.H[row][col] += eqData.C[row][col] / globalData.simulation_step_time;
+            
+            eqData.H[row][col] += eqData.C[row][col] * (1.0/ 50.0);
+            // eqData.H[row][col] += eqData.C[row][col] / globalData.simulation_step_time;
         }
 
         double tmp = 0; // C/dTeta * t0
@@ -279,8 +289,8 @@ void agregate_time_part(Grid &grid, GlobalData& globalData, EquationData& eqData
     }
 }
 
-void print_HG(EquationData ed){
-    printf("HG\n");
+void print_H(EquationData ed){
+    printf("H:\n");
     for(auto& row : ed.H){
         for(double& el : row){
             printf("%lf ", el);
@@ -310,6 +320,9 @@ void print_P(EquationData ed){
 
 int main(int argc, char const *argv[])
 {
+    // ###############################################################
+    // #                            INIT
+    // ###############################################################
     GaussQuad::init_universal_element(GaussQuad::points_2, 2);
     const std::string data_file_path = "./grid_data/Test1_4_4.txt";
     GaussQuad::uniEl.print();
@@ -321,46 +334,88 @@ int main(int argc, char const *argv[])
     
     equationData.initMatrixes(global_data.node_number);
     
-    
     init_univElem_bc_edges_N_values(GaussQuad::points_2, 2);
     
-    global_data.print();
-    grid.print();
-    
     calculate_jacobian_and_dN_dX_dY(grid);
-    
-    calculate_H_matrix(grid, global_data, GaussQuad::points_2, 2);
-    
-    calculate_HG_matrix(grid);
-    
-    calculate_HBC(grid, global_data, GaussQuad::points_2, 2);
 
-    calculate_P(grid, global_data, GaussQuad::points_2, 2);
+    // ###############################################################
+    // #                            SIM
+    // ###############################################################
+
+
+
+    // ###############################################################
+    // #                            SIM
+    // ###############################################################
+
     
-    agregate(grid, global_data, equationData);
+    
+    // calculate_H_matrix(grid, global_data, GaussQuad::points_2, 2);
+    
+    // // calculate_HG_matrix(grid);
+    
+    // calculate_HBC(grid, global_data, GaussQuad::points_2, 2);
+
+    // calculate_P(grid, global_data, GaussQuad::points_2, 2);
+    
+    // agregate(grid, global_data, equationData);
     
     // #######################################################
     
-    printf("\n");
-    print_HG(equationData);
-    print_P(equationData);
+    // printf("\n");
+    // print_HG(equationData);
+    // print_P(equationData);
 
-    auto ttt = solveLinearSystem(equationData.H, equationData.P);
+    // auto ttt = solveLinearSystem(equationData.H, equationData.P);
 
-    for(double &t : ttt){
-        printf("%lf ", t);
-    }
+    // for(double &t : ttt){
+    //     printf("%lf ", t);
+    // }
 
-    agregate_time_part(grid, global_data, equationData, std::vector<double>(global_data.node_number,global_data.initial_temperature));
+    // agregate_time_part(grid, global_data, equationData, std::vector<double>(global_data.node_number,global_data.initial_temperature));
 
-    print_HG(equationData); 
-    print_C(equationData);
-    print_P(equationData);
+    // print_HG(equationData); 
+    // print_C(equationData);
+    // print_P(equationData);
 
-    ttt = solveLinearSystem(equationData.H, equationData.P);
+    // ttt = solveLinearSystem(equationData.H, equationData.P);
 
-    for(double &t : ttt){
-        printf("%lf ", t);
+    // for(double &t : ttt){
+    //     printf("%lf ", t);
+    // }
+
+    // petla symulacji
+    std::vector<double> temperature_v_initial = std::vector<double>(global_data.node_number,global_data.initial_temperature);
+    std::vector<double> temperature_v;
+    for(int stime = 0; stime < global_data.simulation_time; stime+=global_data.simulation_step_time){
+        calculate_H_and_C_matrix(grid, global_data, GaussQuad::points_2, 2);
+        calculate_HBC(grid, global_data, GaussQuad::points_2, 2);
+        calculate_P(grid, global_data, GaussQuad::points_2, 2);
+        agregate(grid, global_data, equationData);
+        
+        print_H(equationData);
+        print_C(equationData);
+        print_P(equationData);
+        
+        agregate_time_part(grid, global_data, equationData, temperature_v_initial);
+
+        // #######################
+        printf("Po agregacji z czasem\n");
+        print_H(equationData);
+        print_P(equationData);
+
+        // #######################
+
+        
+        temperature_v = solveLinearSystem(equationData.H, equationData.P);
+        
+        printf("step: %d\n", stime);
+        for(double &t : temperature_v){
+            printf("%lf ", t);
+        }
+        printf("\n");
+
+        temperature_v_initial = temperature_v;
     }
 
     return 0;
