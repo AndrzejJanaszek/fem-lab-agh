@@ -329,7 +329,8 @@ int main(int argc, char const *argv[])
     // #                            INIT
     // ###############################################################
     GaussQuad::init_universal_element(GaussQuad::points_2, 2);
-    const std::string data_file_path = "./grid_data/Test1_4_4.txt";
+    // const std::string data_file_path = "./grid_data/Test1_4_4.txt";
+    const std::string data_file_path = "./grid_data/Test2_4_4_MixGrid.txt";
     GaussQuad::uniEl.print();
     
     GlobalData global_data;
@@ -392,22 +393,29 @@ int main(int argc, char const *argv[])
     // petla symulacji
     std::vector<double> temperature_v_initial = std::vector<double>(global_data.node_number,global_data.initial_temperature);
     std::vector<double> temperature_v;
+    printf("step: initial\n");
+        for(double &t : temperature_v_initial){
+            printf("%lf ", t);
+        }
+    printf("\n");
+
+    global_data.simulation_step_time = 100;
     for(int stime = 0; stime < global_data.simulation_time; stime+=global_data.simulation_step_time){
         calculate_H_and_C_matrix(grid, global_data, GaussQuad::points_2, 2);
         calculate_HBC(grid, global_data, GaussQuad::points_2, 2);
         calculate_P(grid, global_data, GaussQuad::points_2, 2);
         agregate(grid, global_data, equationData);
         
-        print_H(equationData);
-        print_C(equationData);
-        print_P(equationData);
+        // print_H(equationData);
+        // print_C(equationData);
+        // print_P(equationData);
         
         agregate_time_part(grid, global_data, equationData, temperature_v_initial);
 
         // #######################
-        printf("Po agregacji z czasem\n");
-        print_H(equationData);
-        print_P(equationData);
+        // printf("Po agregacji z czasem\n");
+        // print_H(equationData);
+        // print_P(equationData);
 
         // #######################
 
