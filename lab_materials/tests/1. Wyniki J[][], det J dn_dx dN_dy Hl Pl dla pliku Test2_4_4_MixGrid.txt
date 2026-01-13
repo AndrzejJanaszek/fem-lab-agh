@@ -1,0 +1,581 @@
+Obliczenia wykonane na siatce o nazwie - Test2_4_4_MixGrid.txt
+Poprawnie otworzono plik.
+500
+50
+25
+300
+1200
+100
+7800
+700
+8 16
+9 9
+x = 0.1   Y = 0.005,  status = 0
+x = 0.0546918   Y = 0.005,  status = 0
+x = 0.0226541   Y = 0.005,  status = 0
+x = 0   Y = 0.005,  status = 0
+x = 0.1   Y = -0.0403082,  status = 0
+x = 0.0623899   Y = -0.0326101,  status = 0
+x = 0.0303522   Y = -0.0253522,  status = 0
+x = 0   Y = -0.0176541,  status = 0
+x = 0.1   Y = -0.0723459,  status = 0
+x = 0.0696478   Y = -0.0646478,  status = 0
+x = 0.0376101   Y = -0.0573899,  status = 0
+x = 0   Y = -0.0496918,  status = 0
+x = 0.1   Y = -0.095,  status = 0
+x = 0.0773459   Y = -0.095,  status = 0
+x = 0.0453082   Y = -0.095,  status = 0
+x = 0   Y = -0.095,  status = 0
+ID[1,2,6,5]
+ID[2,3,7,6]
+ID[3,4,8,7]
+ID[5,6,10,9]
+ID[6,7,11,10]
+ID[7,8,12,11]
+ID[9,10,14,13]
+ID[10,11,15,14]
+ID[11,12,16,15]
+Kolejnosc punktow calkowania
+Punkt nr 1
+ksi = -0.57735 eta = -0.57735
+Punkt nr 2
+ksi = 0.57735 eta = -0.57735
+Punkt nr 3
+ksi = -0.57735 eta = 0.57735
+Punkt nr 4
+ksi = 0.57735 eta = 0.57735
+
+dN/dKsi
+-0.394338 0.394338 0.105662 -0.105662
+-0.394338 0.394338 0.105662 -0.105662
+-0.105662 0.105662 0.394338 -0.394338
+-0.105662 0.105662 0.394338 -0.394338
+
+dN/dEta
+-0.394338 -0.105662 0.105662 0.394338
+-0.105662 -0.394338 0.394338 0.105662
+-0.394338 -0.105662 0.105662 0.394338
+-0.105662 -0.394338 0.394338 0.105662
+
+Temperature results
+Obliczenia macierzy Jakobiego dla elementu nr 1
+Macierz Jakobiego dla 1 punktu calkowania
+-0.0218407 0.000813402
+0.000813402 -0.0218407
+DetJ = 0.000476354 dla 1 punktu calkowania
+
+wartosc dN/dx rowna sie
+18.7536, -17.8998, -5.02501, 4.17124,
+wartosc dN/dy rowna sie
+18.7536, 4.17124, -5.02501, -17.8998,
+
+Macierz Jakobiego dla 2 punktu calkowania
+-0.0218407 0.000813402
+0.00303566 -0.0196184
+DetJ = 0.000426011 dla 2 punktu calkowania
+
+wartosc dN/dx rowna sie
+18.3616, -17.4069, -5.61884, 4.66417,
+wartosc dN/dy rowna sie
+8.22705, 17.4069, -20.9698, -4.66417,
+
+Macierz Jakobiego dla 3 punktu calkowania
+-0.0196184 0.00303566
+0.000813402 -0.0218407
+DetJ = 0.000426011 dla 3 punktu calkowania
+
+wartosc dN/dx rowna sie
+8.22705, -4.66417, -20.9698, 17.4069,
+wartosc dN/dy rowna sie
+18.3616, 4.66417, -5.61884, -17.4069,
+
+Macierz Jakobiego dla 4 punktu calkowania
+-0.0196184 0.00303566
+0.00303566 -0.0196184
+DetJ = 0.000375668 dla 4 punktu calkowania
+
+wartosc dN/dx rowna sie
+6.37182, -2.33147, -23.7799, 19.7396,
+wartosc dN/dy rowna sie
+6.37182, 19.7396, -23.7799, -2.33147,
+
+Macierz Hbc dla elementu nt 1
+9.06164 2.26541 0 2.26541
+2.26541 4.53082 0 0
+0 0 0 0
+2.26541 0 0 4.53082
+
+
+H dla elementu - 1
+17.7624 -3.39971 -10.963 -3.39972
+-3.39971 14.6508 -5.14961 -6.10152
+-10.963 -5.14961 21.2622 -5.14961
+-3.39972 -6.10152 -5.14961 14.6508
+
+
+Wektor {P} dla elementu - 1
+16310.9 8155.47 0 8155.47
+
+Obliczenia macierzy Jakobiego dla elementu nr 2
+Macierz Jakobiego dla 1 punktu calkowania
+-0.0160189 0.000766883
+0.00384906 -0.0180382
+DetJ = 0.000285999 dla 1 punktu calkowania
+
+wartosc dN/dx rowna sie
+25.9285, -24.5878, -6.94753, 5.60682,
+wartosc dN/dy rowna sie
+27.394, 0.611065, -7.34021, -20.6649,
+
+Macierz Jakobiego dla 2 punktu calkowania
+-0.0160189 0.000766883
+0.00384906 -0.015943
+DetJ = 0.000252437 dla 2 punktu calkowania
+
+wartosc dN/dx rowna sie
+25.2259, -23.707, -7.87122, 6.35226,
+wartosc dN/dy rowna sie
+12.7177, 19.0107, -26.6346, -5.09391,
+
+Macierz Jakobiego dla 3 punktu calkowania
+-0.0160189 0.00286205
+0.00384906 -0.0180382
+DetJ = 0.000277934 dla 3 punktu calkowania
+
+wartosc dN/dx rowna sie
+10.9183, -5.7695, -26.6809, 21.5321,
+wartosc dN/dy rowna sie
+24.1911, 4.6266, -11.551, -17.2667,
+
+Macierz Jakobiego dla 4 punktu calkowania
+-0.0160189 0.00286205
+0.00384906 -0.015943
+DetJ = 0.000244372 dla 4 punktu calkowania
+
+wartosc dN/dx rowna sie
+8.13098, -2.27506, -30.3452, 24.4893,
+wartosc dN/dy rowna sie
+8.59055, 24.185, -32.0604, -0.715152,
+
+Macierz Hbc dla elementu nt 2
+3.20377 1.60189 0 0
+1.60189 3.20377 0 0
+0 0 0 0
+0 0 0 0
+
+
+H dla elementu - 2
+20.9584 -5.19066 -13.2722 -2.49555
+-5.19066 14.138 -4.44553 -4.50181
+-13.2722 -4.44553 23.3769 -5.65921
+-2.49555 -4.50181 -5.65921 12.6566
+
+
+Wektor {P} dla elementu - 2
+5766.79 5766.79 0 0
+
+Obliczenia macierzy Jakobiego dla elementu nr 3
+Macierz Jakobiego dla 1 punktu calkowania
+-0.0121404 0.000813402
+0.00303566 -0.0143627
+DetJ = 0.0001719 dla 1 punktu calkowania
+
+wartosc dN/dx rowna sie
+34.8138, -32.4479, -9.32833, 6.96242,
+wartosc dN/dy rowna sie
+34.8138, 0.498635, -9.32833, -25.9841,
+
+Macierz Jakobiego dla 2 punktu calkowania
+-0.0121404 0.000813402
+0.000813402 -0.0121404
+DetJ = 0.000146729 dla 2 punktu calkowania
+
+wartosc dN/dx rowna sie
+33.2135, -30.4417, -10.9286, 8.15684,
+wartosc dN/dy rowna sie
+10.9286, 30.4417, -33.2135, -8.15684,
+
+Macierz Jakobiego dla 3 punktu calkowania
+-0.0143627 0.00303566
+0.00303566 -0.0143627
+DetJ = 0.000197072 dla 3 punktu calkowania
+
+wartosc dN/dx rowna sie
+13.775, -6.07313, -30.3671, 22.6652,
+wartosc dN/dy rowna sie
+30.3671, 6.07313, -13.775, -22.6652,
+
+Macierz Jakobiego dla 4 punktu calkowania
+-0.0143627 0.00303566
+0.000813402 -0.0121404
+DetJ = 0.0001719 dla 4 punktu calkowania
+
+wartosc dN/dx rowna sie
+9.32833, -0.498634, -34.8138, 25.9841,
+wartosc dN/dy rowna sie
+9.32833, 32.4479, -34.8138, -6.96242,
+
+Macierz Hbc dla elementu nt 3
+2.26541 1.1327 0 0
+1.1327 4.53082 1.1327 0
+0 1.1327 2.26541 0
+0 0 0 0
+
+
+H dla elementu - 3
+21.1279 -5.49125 -12.3674 -3.26933
+-5.49125 16.2136 -5.49125 -5.23115
+-12.3674 -5.49125 21.1279 -3.26933
+-3.26933 -5.23115 -3.26933 11.7698
+
+
+Wektor {P} dla elementu - 3
+4077.74 8155.47 4077.74 0
+
+Obliczenia macierzy Jakobiego dla elementu nr 4
+Macierz Jakobiego dla 1 punktu calkowania
+-0.0180382 0.00384906
+0.000766883 -0.0160189
+DetJ = 0.000285999 dla 1 punktu calkowania
+
+wartosc dN/dx rowna sie
+27.3941, -20.6649, -7.34021, 0.611062,
+wartosc dN/dy rowna sie
+25.9285, 5.60682, -6.94753, -24.5878,
+
+Macierz Jakobiego dla 2 punktu calkowania
+-0.0180382 0.00384906
+0.00286205 -0.0160189
+DetJ = 0.000277934 dla 2 punktu calkowania
+
+wartosc dN/dx rowna sie
+24.1911, -17.2667, -11.551, 4.6266,
+wartosc dN/dy rowna sie
+10.9183, 21.5321, -26.6809, -5.76951,
+
+Macierz Jakobiego dla 3 punktu calkowania
+-0.015943 0.00384906
+0.000766883 -0.0160189
+DetJ = 0.000252437 dla 3 punktu calkowania
+
+wartosc dN/dx rowna sie
+12.7177, -5.09391, -26.6346, 19.0107,
+wartosc dN/dy rowna sie
+25.2259, 6.35226, -7.87122, -23.707,
+
+Macierz Jakobiego dla 4 punktu calkowania
+-0.015943 0.00384906
+0.00286205 -0.0160189
+DetJ = 0.000244372 dla 4 punktu calkowania
+
+wartosc dN/dx rowna sie
+8.59055, -0.715151, -32.0604, 24.185,
+wartosc dN/dy rowna sie
+8.13098, 24.4893, -30.3452, -2.27507,
+
+Macierz Hbc dla elementu nt 4
+3.20377 0 0 1.60189
+0 0 0 0
+0 0 0 0
+1.60189 0 0 3.20377
+
+
+H dla elementu - 4
+20.9584 -2.49555 -13.2722 -5.19067
+-2.49555 12.6566 -5.65921 -4.50181
+-13.2722 -5.65921 23.3769 -4.44552
+-5.19067 -4.50181 -4.44552 14.138
+
+
+Wektor {P} dla elementu - 4
+5766.79 0 0 5766.79
+
+Obliczenia macierzy Jakobiego dla elementu nr 5
+Macierz Jakobiego dla 1 punktu calkowania
+-0.0160189 0.00362893
+0.00362893 -0.0160189
+DetJ = 0.000243435 dla 1 punktu calkowania
+
+wartosc dN/dx rowna sie
+31.8273, -24.3737, -8.52809, 1.07449,
+wartosc dN/dy rowna sie
+31.8273, 1.07449, -8.52809, -24.3737,
+
+Macierz Jakobiego dla 2 punktu calkowania
+-0.0160189 0.00362893
+0.00362893 -0.0160189
+DetJ = 0.000243435 dla 2 punktu calkowania
+
+wartosc dN/dx rowna sie
+27.5239, -20.0703, -12.8314, 5.37783,
+wartosc dN/dy rowna sie
+12.8314, 20.0703, -27.5239, -5.37783,
+
+Macierz Jakobiego dla 3 punktu calkowania
+-0.0160189 0.00362893
+0.00362893 -0.0160189
+DetJ = 0.000243435 dla 3 punktu calkowania
+
+wartosc dN/dx rowna sie
+12.8314, -5.37783, -27.5239, 20.0703,
+wartosc dN/dy rowna sie
+27.5239, 5.37783, -12.8314, -20.0703,
+
+Macierz Jakobiego dla 4 punktu calkowania
+-0.0160189 0.00362893
+0.00362893 -0.0160189
+DetJ = 0.000243435 dla 4 punktu calkowania
+
+wartosc dN/dx rowna sie
+8.52809, -1.0745, -31.8273, 24.3737,
+wartosc dN/dy rowna sie
+8.52809, 24.3737, -31.8273, -1.07449,
+
+Macierz Hbc dla elementu nt 5
+0 0 0 0
+0 0 0 0
+0 0 0 0
+0 0 0 0
+
+
+H dla elementu - 5
+24.4398 -4.61748 -15.2049 -4.61748
+-4.61748 12.5 -4.61748 -3.26505
+-15.2049 -4.61748 24.4398 -4.61748
+-4.61748 -3.26505 -4.61748 12.5
+
+
+Wektor {P} dla elementu - 5
+0 0 0 0
+
+Obliczenia macierzy Jakobiego dla elementu nr 6
+Macierz Jakobiego dla 1 punktu calkowania
+-0.015943 0.00384906
+0.00286204 -0.0160189
+DetJ = 0.000244372 dla 1 punktu calkowania
+
+wartosc dN/dx rowna sie
+32.0604, -24.185, -8.59055, 0.715151,
+wartosc dN/dy rowna sie
+30.3452, 2.27507, -8.13098, -24.4893,
+
+Macierz Jakobiego dla 2 punktu calkowania
+-0.015943 0.00384906
+0.000766883 -0.0160189
+DetJ = 0.000252437 dla 2 punktu calkowania
+
+wartosc dN/dx rowna sie
+26.6346, -19.0107, -12.7177, 5.09391,
+wartosc dN/dy rowna sie
+7.87122, 23.707, -25.2259, -6.35226,
+
+Macierz Jakobiego dla 3 punktu calkowania
+-0.0180382 0.00384906
+0.00286204 -0.0160189
+DetJ = 0.000277934 dla 3 punktu calkowania
+
+wartosc dN/dx rowna sie
+11.551, -4.6266, -24.1911, 17.2667,
+wartosc dN/dy rowna sie
+26.6809, 5.7695, -10.9183, -21.5321,
+
+Macierz Jakobiego dla 4 punktu calkowania
+-0.0180382 0.00384906
+0.000766883 -0.0160189
+DetJ = 0.000285999 dla 4 punktu calkowania
+
+wartosc dN/dx rowna sie
+7.34021, -0.611063, -27.3941, 20.6649,
+wartosc dN/dy rowna sie
+6.94753, 24.5878, -25.9285, -5.60682,
+
+Macierz Hbc dla elementu nt 6
+0 0 0 0
+0 3.20377 1.60189 0
+0 1.60189 3.20377 0
+0 0 0 0
+
+
+H dla elementu - 6
+23.3769 -4.44553 -13.2722 -5.65921
+-4.44553 14.138 -5.19066 -4.50181
+-13.2722 -5.19066 20.9584 -2.49555
+-5.65921 -4.50181 -2.49555 12.6566
+
+
+Wektor {P} dla elementu - 6
+0 5766.79 5766.79 0
+
+Obliczenia macierzy Jakobiego dla elementu nr 7
+Macierz Jakobiego dla 1 punktu calkowania
+-0.0143627 0.00303566
+0.000813402 -0.0121404
+DetJ = 0.0001719 dla 1 punktu calkowania
+
+wartosc dN/dx rowna sie
+34.8138, -25.9841, -9.32833, 0.498635,
+wartosc dN/dy rowna sie
+34.8138, 6.96242, -9.32833, -32.4479,
+
+Macierz Jakobiego dla 2 punktu calkowania
+-0.0143627 0.00303566
+0.00303566 -0.0143627
+DetJ = 0.000197072 dla 2 punktu calkowania
+
+wartosc dN/dx rowna sie
+30.3671, -22.6652, -13.775, 6.07313,
+wartosc dN/dy rowna sie
+13.775, 22.6652, -30.3671, -6.07313,
+
+Macierz Jakobiego dla 3 punktu calkowania
+-0.0121404 0.000813402
+0.000813402 -0.0121404
+DetJ = 0.000146729 dla 3 punktu calkowania
+
+wartosc dN/dx rowna sie
+10.9286, -8.15684, -33.2135, 30.4417,
+wartosc dN/dy rowna sie
+33.2135, 8.15684, -10.9286, -30.4417,
+
+Macierz Jakobiego dla 4 punktu calkowania
+-0.0121404 0.000813402
+0.00303566 -0.0143627
+DetJ = 0.0001719 dla 4 punktu calkowania
+
+wartosc dN/dx rowna sie
+9.32833, -6.96242, -34.8138, 32.4479,
+wartosc dN/dy rowna sie
+9.32833, 25.9841, -34.8138, -0.498635,
+
+Macierz Hbc dla elementu nt 7
+2.26541 0 0 1.1327
+0 0 0 0
+0 0 2.26541 1.1327
+1.1327 0 1.1327 4.53082
+
+
+H dla elementu - 7
+21.1279 -3.26933 -12.3674 -5.49125
+-3.26933 11.7698 -3.26933 -5.23115
+-12.3674 -3.26933 21.1279 -5.49125
+-5.49125 -5.23115 -5.49125 16.2136
+
+
+Wektor {P} dla elementu - 7
+4077.74 0 4077.74 8155.47
+
+Obliczenia macierzy Jakobiego dla elementu nr 8
+Macierz Jakobiego dla 1 punktu calkowania
+-0.0160189 0.00286204
+0.00384906 -0.015943
+DetJ = 0.000244372 dla 1 punktu calkowania
+
+wartosc dN/dx rowna sie
+30.3452, -24.4893, -8.13097, 2.27507,
+wartosc dN/dy rowna sie
+32.0604, 0.715151, -8.59055, -24.185,
+
+Macierz Jakobiego dla 2 punktu calkowania
+-0.0160189 0.00286204
+0.00384906 -0.0180382
+DetJ = 0.000277934 dla 2 punktu calkowania
+
+wartosc dN/dx rowna sie
+26.6809, -21.5321, -10.9183, 5.76951,
+wartosc dN/dy rowna sie
+11.551, 17.2667, -24.1911, -4.6266,
+
+Macierz Jakobiego dla 3 punktu calkowania
+-0.0160189 0.000766882
+0.00384906 -0.015943
+DetJ = 0.000252437 dla 3 punktu calkowania
+
+wartosc dN/dx rowna sie
+7.87122, -6.35226, -25.2259, 23.707,
+wartosc dN/dy rowna sie
+26.6346, 5.09391, -12.7177, -19.0107,
+
+Macierz Jakobiego dla 4 punktu calkowania
+-0.0160189 0.000766882
+0.00384906 -0.0180382
+DetJ = 0.000285999 dla 4 punktu calkowania
+
+wartosc dN/dx rowna sie
+6.94753, -5.60682, -25.9285, 24.5878,
+wartosc dN/dy rowna sie
+7.34021, 20.6649, -27.3941, -0.611063,
+
+Macierz Hbc dla elementu nt 8
+0 0 0 0
+0 0 0 0
+0 0 3.20377 1.60189
+0 0 1.60189 3.20377
+
+
+H dla elementu - 8
+23.3769 -5.65921 -13.2722 -4.44553
+-5.65921 12.6566 -2.49555 -4.50181
+-13.2722 -2.49555 20.9584 -5.19066
+-4.44553 -4.50181 -5.19066 14.138
+
+
+Wektor {P} dla elementu - 8
+0 0 5766.79 5766.79
+
+Obliczenia macierzy Jakobiego dla elementu nr 9
+Macierz Jakobiego dla 1 punktu calkowania
+-0.0196184 0.00303566
+0.00303566 -0.0196184
+DetJ = 0.000375668 dla 1 punktu calkowania
+
+wartosc dN/dx rowna sie
+23.7799, -19.7396, -6.37182, 2.33147,
+wartosc dN/dy rowna sie
+23.7799, 2.33147, -6.37182, -19.7396,
+
+Macierz Jakobiego dla 2 punktu calkowania
+-0.0196184 0.00303566
+0.000813402 -0.0218407
+DetJ = 0.000426011 dla 2 punktu calkowania
+
+wartosc dN/dx rowna sie
+20.9698, -17.4069, -8.22705, 4.66417,
+wartosc dN/dy rowna sie
+5.61884, 17.4069, -18.3616, -4.66417,
+
+Macierz Jakobiego dla 3 punktu calkowania
+-0.0218407 0.000813402
+0.00303566 -0.0196184
+DetJ = 0.000426011 dla 3 punktu calkowania
+
+wartosc dN/dx rowna sie
+5.61884, -4.66417, -18.3616, 17.4069,
+wartosc dN/dy rowna sie
+20.9698, 4.66417, -8.22705, -17.4069,
+
+Macierz Jakobiego dla 4 punktu calkowania
+-0.0218407 0.000813402
+0.000813402 -0.0218407
+DetJ = 0.000476354 dla 4 punktu calkowania
+
+wartosc dN/dx rowna sie
+5.02501, -4.17124, -18.7536, 17.8998,
+wartosc dN/dy rowna sie
+5.02501, 17.8998, -18.7536, -4.17124,
+
+Macierz Hbc dla elementu nt 9
+0 0 0 0
+0 4.53082 2.26541 0
+0 2.26541 9.06164 2.26541
+0 0 2.26541 4.53082
+
+
+H dla elementu - 9
+21.2622 -5.14961 -10.963 -5.14961
+-5.14961 14.6508 -3.39971 -6.10152
+-10.963 -3.39971 17.7624 -3.39971
+-5.14961 -6.10152 -3.39971 14.6508
+
+
+Wektor {P} dla elementu - 9
+0 8155.47 16310.9 8155.47
