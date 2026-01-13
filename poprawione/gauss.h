@@ -19,25 +19,17 @@ public:
     // 0: ma node pierwszy i drugi
     // 1: ma node drugi i trzeci itd.
 
-    // class Surface{
-    //     public:
-    //     // todo dla zdefiniowanej liczby npc
-    //     // dla 2 punktów całkowania
-    //     std::array<std::vector<double>, 2> N_values_for_npc;
-        
-        
-    // }
-
     // key: id edge'a, key: id punktu calkowania, wektor Ni dla danego punktu całkowania na krawędzi
     // static std::map<int, std::map<int, std::vector<double>>> N_values_for_edge_points;
 
-    void print(){
+    void print(int npc){
+        printf("N1\tN2\tN3\tN4\n");
         printf("dN_dKsi:\n");
-        for(int i = 0; i < 4; i++)
+        for(int i = 0; i < npc*npc; i++)
             printf("%lf, %lf, %lf, %lf\n", dN_dKsi[i][0], dN_dKsi[i][1], dN_dKsi[i][2], dN_dKsi[i][3]);
 
         printf("dN_dEta:\n");
-        for(int i = 0; i < 4; i++)
+        for(int i = 0; i < npc*npc; i++)
             printf("%lf, %lf, %lf, %lf\n", dN_dEta[i][0], dN_dEta[i][1], dN_dEta[i][2], dN_dEta[i][3]);
     }
 };
@@ -90,8 +82,8 @@ public:
         uniEl.dN_dEta.resize(npc * npc);
         
         // set data
-        for(int i_ksi = 0; i_ksi < 2; i_ksi++){
-            for(int i_eta = 0; i_eta < 2; i_eta++){
+        for(int i_ksi = 0; i_ksi < npc; i_ksi++){
+            for(int i_eta = 0; i_eta < npc; i_eta++){
                 double ksi = points[2*i_ksi];
                 double eta = points[2*i_eta];
                 uniEl.dN_dKsi[npc*i_ksi+i_eta][0] = -0.25*(1-eta);
@@ -115,7 +107,7 @@ const std::array<double, 4> GaussQuad::points_2 = {
 
 const std::array<double, 6> GaussQuad::points_3 = {
     -0.77459666924148340, (5.0 / 9.0),
-    0, 8.0 / 9.0,
+    0, (8.0 / 9.0),
     0.77459666924148340, (5.0 / 9.0)
 };
 
@@ -130,6 +122,9 @@ UniversalElement4 GaussQuad::uniEl;
 
 template<size_t N>
 void init_univElem_bc_edges_N_values(const std::array<double, N> &points, int npc = 2){
+    for (int i = 0; i < 4; i++)
+        UniversalElement4::edges_N_values[i].clear();
+
     // edge 0: node 1 and 2
     // edge 1: node 2 and 3 etc.
     for(int edge_index = 0; edge_index < 4; edge_index++){

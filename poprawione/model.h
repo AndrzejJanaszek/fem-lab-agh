@@ -96,8 +96,8 @@ class Element4
 
     std::vector<Edge> bc_edges;
 
-    std::array<std::array<double, 4>, 4> dN_dX;
-    std::array<std::array<double, 4>, 4> dN_dY;
+    std::vector<std::array<double, 4>> dN_dX;
+    std::vector<std::array<double, 4>> dN_dY;
 
     // todo N1 .. N4 dla punktów na edgach
     // 4 * npc * 4
