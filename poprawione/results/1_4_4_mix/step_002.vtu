@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="16" NumberOfCells="9">
+      <PointData Scalars="Temperature">
+        <DataArray type="Float32" Name="Temperature" format="ascii">
+          577.694
+          409.886
+          463.404
+          586.998
+          409.886
+          220.164
+          262.503
+          463.404
+          463.404
+          262.503
+          220.164
+          409.886
+          586.998
+          463.404
+          409.886
+          577.694
+        </DataArray>
+      </PointData>
+      <CellData>
+      </CellData>
+      <Points>
+        <DataArray type="Float32" NumberOfComponents="3" format="ascii">
+          0.1 0.005 0.0
+          0.0546918 0.005 0.0
+          0.0226541 0.005 0.0
+          0 0.005 0.0
+          0.1 -0.0403082 0.0
+          0.0623899 -0.0326101 0.0
+          0.0303522 -0.0253522 0.0
+          0 -0.0176541 0.0
+          0.1 -0.0723459 0.0
+          0.0696478 -0.0646478 0.0
+          0.0376101 -0.0573899 0.0
+          0 -0.0496918 0.0
+          0.1 -0.095 0.0
+          0.0773459 -0.095 0.0
+          0.0453082 -0.095 0.0
+          0 -0.095 0.0
+        </DataArray>
+      </Points>
+      <Cells>
+        <DataArray type="Int32" Name="connectivity" format="ascii">
+          0 1 5 4 
+          1 2 6 5 
+          2 3 7 6 
+          4 5 9 8 
+          5 6 10 9 
+          6 7 11 10 
+          8 9 13 12 
+          9 10 14 13 
+          10 11 15 14 
+        </DataArray>
+        <DataArray type="Int32" Name="offsets" format="ascii">
+          4
+          8
+          12
+          16
+          20
+          24
+          28
+          32
+          36
+        </DataArray>
+        <DataArray type="UInt8" Name="types" format="ascii">
+          9
+          9
+          9
+          9
+          9
+          9
+          9
+          9
+          9
+        </DataArray>
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+</VTKFile>

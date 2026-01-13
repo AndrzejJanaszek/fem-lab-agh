@@ -8,11 +8,13 @@
 #include <cmath>
 #include <map>
 #include <algorithm>
+#include <sstream>
 
 
 #include "model.h"
 #include "gauss.h"
 #include "solver.h"
+#include "vtu_parser.h"
 
 // założenia programu:
 // element 4 węzłowy
@@ -356,14 +358,18 @@ void print_P(EquationData ed){
 
 int main(int argc, char const *argv[])
 {
-    const int GAUSS_I_POINTS = 3;
-    auto GAUSS_POINTS_ARRAY = GaussQuad::points_3;
+    const int GAUSS_I_POINTS = 2;
+    auto GAUSS_POINTS_ARRAY = GaussQuad::points_2;
+    // std::string RESULT_PATH = "results/1_4_4/";
+    // std::string RESULT_PATH = "results/1_4_4_mix/";
+    std::string RESULT_PATH = "results/31_31/";
     // ###############################################################
     // #                            INIT
     // ###############################################################
     GaussQuad::init_universal_element(GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
     // const std::string data_file_path = "./grid_data/Test1_4_4.txt";
-    const std::string data_file_path = "./grid_data/Test2_4_4_MixGrid.txt";
+    // const std::string data_file_path = "./grid_data/Test2_4_4_MixGrid.txt";
+    const std::string data_file_path = "./grid_data/Test3_31_31_kwadrat.txt";
     GaussQuad::uniEl.print(GAUSS_I_POINTS);
     
     GlobalData global_data;
@@ -390,20 +396,21 @@ int main(int argc, char const *argv[])
         }
     printf("\n");
 
-    global_data.simulation_step_time = 100;
-    for(int stime = 0; stime < global_data.simulation_time; stime+=global_data.simulation_step_time){
+    // global_data.simulation_step_time = 100;
+    int step = 0;
+    for(int stime = 0; stime <= global_data.simulation_time; stime+=global_data.simulation_step_time){
         calculate_H_and_C_matrix(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
-        print_H_from_elements(grid);
-        print_C_from_elements(grid);
+        // print_H_from_elements(grid);
+        // print_C_from_elements(grid);
 
         calculate_HBC(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
 
         calculate_P(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
-        print_P_from_elements(grid);
+        // print_P_from_elements(grid);
 
         agregate(grid, global_data, equationData);
 
-        print_H(equationData);
+        // print_H(equationData);
 
         
         // print_C(equationData);
@@ -411,10 +418,9 @@ int main(int argc, char const *argv[])
         agregate_time_part(grid, global_data, equationData, temperature_v_initial);
 
         // #######################
-        printf("Po agregacji z czasem\n");
-        print_H(equationData);
-        print_P(equationData);
-
+        // printf("Po agregacji z czasem\n");
+        // print_H(equationData);
+        // print_P(equationData);
         // #######################
 
         
@@ -428,9 +434,26 @@ int main(int argc, char const *argv[])
 
         temperature_v_initial = temperature_v;
 
-        //* JEDNA ITERACJA BREAK
-        break;
+        // //* JEDNA ITERACJA BREAK
+        // break;
+
+        //* ZAPIS SYMULACJI DO PLIKU - ZAPIS KORKU SYMULACJI
+        std::stringstream ss;
+        ss << RESULT_PATH
+        << "step_"
+        << std::setw(3) << std::setfill('0') << step
+        << ".vtu";
+
+        writeVTU(ss.str(), grid, temperature_v);
+        step++;
     }
+
+    //* ZAPIS SYMULACJI DO PLIKU - OPIS KROKÓW SYMULACJI
+    writePVD(
+        RESULT_PATH + "simulation.pvd",
+        step,
+        global_data.simulation_step_time
+    );
 
     return 0;
 }
