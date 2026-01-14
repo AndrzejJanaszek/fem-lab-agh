@@ -8,6 +8,7 @@
 #include <cmath>
 #include <map>
 #include <algorithm>
+#include <numeric>
 #include <sstream>
 
 
@@ -15,6 +16,7 @@
 #include "gauss.h"
 #include "solver.h"
 #include "vtu_parser.h"
+#include <unordered_set>
 
 
 // miedź
@@ -26,7 +28,13 @@ const double AIR_CONDUCTIVITY = 0.025;
 const double AIR_DENSITY = 1.25;
 const double AIR_SPECIFIC_HEAT = 1004.0;
 
-const double HEAT_GENERATION = 65 * 1000000; // W/m3
+ // W/m3
+ // 13mm*13mm*1.3mm / 1000^3 --- mm3 => m3
+const double HEAT_GENERATION = 10 / (13*13*1.3 / (1000*1000*1000));
+
+const double SCALE_FACTOR_X = 0.39;
+// const double SCALE_FACTOR_X = 1;
+const double SCALE_FACTOR_Y = SCALE_FACTOR_X;
 
 // IHS I RESZTA RADIATORA
 std::vector<int> COPPER_ELEMENTS = {95,96,97,101,102,103,107,108,109,113,114,115,125,126,127,131,132,133,137,138,139,143,144,145,155,156,157,161,162,163,167,168,169,173,174,175,185,186,187,191,192,193,197,198,199,203,204,205,215,216,217,221,222,223,227,228,229,233,234,235,245,246,247,251,252,253,257,258,259,263,264,265,275,276,277,281,282,283,287,288,289,293,294,295,305,306,307,311,312,313,317,318,319,323,324,325,335,336,337,341,342,343,347,348,349,353,354,355,365,366,367,371,372,373,377,378,379,383,384,385,395,396,397,401,402,403,407,408,409,413,414,415,425,426,427,431,432,433,437,438,439,443,444,445,455,456,457,461,462,463,467,468,469,473,474,475,485,486,487,491,492,493,497,498,499,503,504,505,515,516,517,521,522,523,527,528,529,533,534,535,545,546,547,551,552,553,557,558,559,563,564,565,575,576,577,581,582,583,587,588,589,593,594,595,605,606,607,611,612,613,617,618,619,623,624,625,635,636,637,641,642,643,647,648,649,653,654,655,665,666,667,671,672,673,677,678,679,683,684,685,695,696,697,701,702,703,707,708,709,713,714,715,725,726,727,731,732,733,737,738,739,743,744,745,755,756,757,761,762,763,767,768,769,773,774,775,785,786,787,791,792,793,797,798,799,803,804,805,811,812,813,814,815,816,817,818,819,820,821,822,823,824,825,826,827,828,829,830,831,832,833,834,835,836,837,838,839,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,859,860,861,862,863,864,865,866,867,868,869,870,871,872,873,874,875,876,877,878,879,880,881,882,883,884,885,886,887,888,889,890,891,892,893,894,895,896,897,898,899,900};
@@ -325,7 +333,7 @@ void agregate_time_part(Grid &grid, GlobalData& globalData, EquationData& eqData
     }
 }
 
-void print_H_from_elements(Grid grid){
+void print_H_from_elements(Grid& grid){
     std::vector<std::vector<double>> H;
     H.assign(grid.node_number, std::vector<double>(grid.node_number, 0.0));
 
@@ -346,7 +354,7 @@ void print_H_from_elements(Grid grid){
     }
 }
 
-void print_C_from_elements(Grid grid){
+void print_C_from_elements(Grid& grid){
     std::vector<std::vector<double>> H;
     H.assign(grid.node_number, std::vector<double>(grid.node_number, 0.0));
 
@@ -367,7 +375,7 @@ void print_C_from_elements(Grid grid){
     }
 }
 
-void print_P_from_elements(Grid grid){
+void print_P_from_elements(Grid& grid){
     std::vector<double> P;
     P.assign(grid.node_number, 0.0);
 
@@ -386,7 +394,7 @@ void print_P_from_elements(Grid grid){
 
 
 
-void print_H(EquationData ed){
+void print_H(EquationData& ed){
     printf("H:\n");
     for(auto& row : ed.H){
         for(double& el : row){
@@ -396,7 +404,7 @@ void print_H(EquationData ed){
     }
 }
 
-void print_C(EquationData ed){
+void print_C(EquationData& ed){
     printf("C:\n");
     for(auto& row : ed.C){
         for(double& el : row){
@@ -406,7 +414,7 @@ void print_C(EquationData ed){
     }
 }
 
-void print_P(EquationData ed){
+void print_P(EquationData& ed){
     printf("P:\n");
     for(double& el : ed.P){
         printf("%lf ", el);
@@ -414,12 +422,82 @@ void print_P(EquationData ed){
     printf("\n");
 }
 
+void scale_mesh(Grid& grid, double scale_factor_x, double scale_factor_y){
+    for(auto& node : grid.nodes){
+        node.x = node.x * scale_factor_x;
+        node.y = node.y * scale_factor_y;
+    }
+}
+
+void print_temp_info(const std::vector<double>& temp_vec, double min_temp_condition) {
+    if (temp_vec.empty()) return;
+
+    auto [min_it, max_it] = std::minmax_element(temp_vec.begin(), temp_vec.end());
+    double avg = std::accumulate(temp_vec.begin(), temp_vec.end(), 0.0) / temp_vec.size();
+
+    std::cout << "min: " << *min_it
+              << " max: " << *max_it
+              << " avg: " << avg << '\n';
+
+    std::cout << "IDs with temp < " << min_temp_condition << ": ";
+    bool found = false;
+    for (size_t i = 0; i < temp_vec.size(); ++i) {
+        if (temp_vec[i] < min_temp_condition) {
+            std::cout << i << " ";
+            found = true;
+        }
+    }
+    if (!found) std::cout << "none";
+    std::cout << '\n';
+}
+
+// ustawia wektor elementów powietrza
+void set_air_elemnts_ids(std::vector<int>& air_elemnts_ids, Grid& grid) {
+    air_elemnts_ids.clear();
+
+    std::unordered_set<int> copper_set(COPPER_ELEMENTS.begin(), COPPER_ELEMENTS.end());
+
+    for (int id = 1; id <= grid.element_number; ++id) {
+        if (copper_set.find(id) == copper_set.end()) {
+            air_elemnts_ids.push_back(id);
+        }
+    }
+}
+
+// uśrednia wartość temperatury dla całęgo powietrza
+void air_diffusion(std::vector<double>& temp_vec, const std::vector<int>& air_elemnts_ids, Grid& grid){
+    // jezeli brak powietrza zakoncz
+    if(air_elemnts_ids.empty()) return;
+
+    std::unordered_set<int> air_nodes_ids;
+    double sum = 0;
+    // dla każdego elementu powietrza
+    for(auto& el : air_elemnts_ids){
+
+        // policz srednia temperature w elemencie powietrza (suma temp w nodach / 4)
+        // i dodaj do ogólnej sumy
+        double el_sum = 0;
+        for(auto& node_id : grid.elements[el-1].node_ids){
+            el_sum += temp_vec[node_id-1];
+            air_nodes_ids.insert(node_id);
+        }
+        sum += el_sum/4;
+    }
+    // srednia
+    sum = sum / air_elemnts_ids.size();
+
+    // przypisz średnią temperature
+    for(auto& id : air_nodes_ids){
+        temp_vec[id-1] = sum;
+    }
+}
 
 int main(int argc, char const *argv[])
 {
+    std::vector<int> air_elemnts_ids;
     const int GAUSS_I_POINTS = 2;
     auto GAUSS_POINTS_ARRAY = GaussQuad::points_2;
-
+// printf("HTEAT: %lf\n", HEAT_GENERATION);
     // std::string RESULT_PATH = "results/1_4_4/";
     // std::string RESULT_PATH = "results/1_4_4_mix/";
     // std::string RESULT_PATH = "results/31_31/";
@@ -438,6 +516,12 @@ int main(int argc, char const *argv[])
     Grid grid;
     EquationData equationData;
     load_data_from_file(data_file_path, global_data, grid);
+    scale_mesh(grid, SCALE_FACTOR_X, SCALE_FACTOR_Y);
+    set_air_elemnts_ids(air_elemnts_ids, grid);
+
+    // for(auto& el : air_elemnts_ids){
+    //     printf("%d, ", el);
+    // }
     
     equationData.initMatrixes(global_data.node_number);
     
@@ -456,15 +540,15 @@ int main(int argc, char const *argv[])
     std::vector<double> temperature_v_initial = std::vector<double>(global_data.node_number, global_data.tot);
 
     std::vector<double> temperature_v = std::vector<double>(global_data.node_number, 0);
-    printf("step: initial\n");
-        for(double &t : temperature_v_initial){
-            printf("%lf ", t);
-        }
-    printf("\n");
+    // printf("step: initial\n");
+    //     for(double &t : temperature_v_initial){
+    //         printf("%lf ", t);
+    //     }
+    // printf("\n");
 
     // global_data.simulation_step_time = 100;
     
-    global_data.simulation_time = 40;
+    global_data.simulation_time = 120;
     global_data.simulation_step_time = 1;
 
     // global_data.print();
@@ -493,7 +577,7 @@ int main(int argc, char const *argv[])
         
         // print_C(equationData);
         
-        agregate_time_part(grid, global_data, equationData, temperature_v_initial);
+        // agregate_time_part(grid, global_data, equationData, temperature_v_initial);
 
         // #######################
         // printf("Po agregacji z czasem\n");
@@ -503,6 +587,10 @@ int main(int argc, char const *argv[])
 
         
         temperature_v = solveLinearSystem(equationData.H, equationData.P);
+        //* DYFUZJA DLA POWIETRZA
+        air_diffusion(temperature_v, air_elemnts_ids, grid);
+
+        print_temp_info(temperature_v, global_data.tot);
         
         // printf("step: %d\n", stime);
         // for(double &t : temperature_v){

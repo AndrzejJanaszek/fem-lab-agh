@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Node visualizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="controls">
+    <input type="number" id="nodeId" placeholder="Pojedyncze ID">
+    <input type="text" id="nodeList" placeholder="Lista ID (np. 1,5,32)">
+    <label>
+        <input type="checkbox" id="zeroBased">
+        numeruj od 0
+    </label>
+    <label>
+        <input type="checkbox" id="showElements">
+        pokaż elementy zamiast nodów
+    </label>
+    <button onclick="highlightNodes()">Pokaż</button>
+</div>
+
+<div id="grid"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

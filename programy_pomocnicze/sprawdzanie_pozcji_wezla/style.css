@@ -1,0 +1,32 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.controls {
+    margin: 20px;
+}
+
+#grid {
+    display: grid;
+    gap: 4px;
+}
+
+.node {
+    width: 16px;
+    height: 16px;
+    background: #000;
+    border-radius: 3px;
+    transition: 0.2s;
+}
+
+.node.active {
+    background: #00ff88;
+    transform: scale(1.8);
+    box-shadow: 0 0 10px #00ff88;
+    z-index: 10;
+}
