@@ -41,13 +41,15 @@
 // #############################################
 
 // miedź
-const double COPPER_CONDUCTIVITY = 400.0;
-const double COPPER_DENSITY = 8940.0;
-const double COPPER_SPECIFIC_HEAT = 385.0;
+const double COPPER_CONDUCTIVITY = 394.85;
+const double COPPER_DENSITY = 8911.47;
+const double COPPER_SPECIFIC_HEAT = 384.37;
 // powietrze
-const double AIR_CONDUCTIVITY = 0.025;
-const double AIR_DENSITY = 1.25;
-const double AIR_SPECIFIC_HEAT = 1004.0;
+const double AIR_CONDUCTIVITY = 0.025368;
+const double AIR_DENSITY = 1.20435;
+const double AIR_SPECIFIC_HEAT = 1006.55;
+
+const double STATIONARY_STATE_EPSILON = 0.001;
 
  // W/m3
  // 13mm*13mm*1.3mm / 1000^3 --- mm3 => m3
@@ -601,6 +603,39 @@ bool is_stationary(const std::vector<double>& temp_vec, double max_prev, double 
     return std::abs(current_max - max_prev) <= epsilon;
 }
 
+void save_temp_info(const TempInfo& info,
+                    int step,
+                    double stime,
+                    const std::string& file_path)
+{
+    std::ofstream file(file_path, std::ios::app); // dopisuj
+
+    if (!file.is_open()) {
+        throw std::runtime_error("Cannot open file: " + file_path);
+    }
+
+    file << step  << ';'
+         << stime << ';'
+         << info.min << ';'
+         << info.max << ';'
+         << info.avg << '\n';
+
+    file.close();
+}
+
+void trunc_file(const std::string& file_path)
+{
+    std::ofstream file(file_path, std::ios::trunc);
+    if (!file.is_open()) {
+        throw std::runtime_error("Cannot truncate file: " + file_path);
+    }
+    file.close();
+}
+
+void save_temperature_vec_to_file(const std::vector<double>& temp_vec, const std::string& file_path){
+
+}
+
 // #############################################
 //* ############### MAIN ###############
 // #############################################
@@ -616,7 +651,7 @@ int main(int argc, char const *argv[])
     TempInfo prev_temp_info;   // dla sprawdzenia czy proces jest ustalony
 
     const bool DIFFUSION = true;
-    const bool TIME_PART_AGREGATION = true;
+    const bool TIME_PART_AGREGATION = false;
 
     // printf("HTEAT: %lf\n", HEAT_GENERATION);
     // std::string RESULT_PATH = "results/1_4_4/";
@@ -628,6 +663,8 @@ int main(int argc, char const *argv[])
     // const std::string data_file_path = "./grid_data/Test2_4_4_MixGrid.txt";
     // const std::string data_file_path = "./grid_data/Test3_31_31_kwadrat.txt";
     const std::string data_file_path = "./real_problem/real_4_kolumny.txt";
+
+    const std::string temperature_out_data_file_path = "temperature_results/real.txt";
 
     // ###############################################################
     //*#                            INIT
@@ -661,20 +698,17 @@ int main(int argc, char const *argv[])
     //*#                       SIMULATION
     // ###############################################################
 
+
+    //* CZYSZCZENIE PLIKU Z WYKAZEM TEMPERATUR
+    trunc_file(temperature_out_data_file_path);
+
     //* SETUP INITIAL TEMPERATURE
     // std::vector<double> temperature_v_initial = std::vector<double>(global_data.node_number,global_data.initial_temperature);
     std::vector<double> temperature_v_initial = std::vector<double>(global_data.node_number, global_data.tot);
 
     std::vector<double> temperature_v = std::vector<double>(global_data.node_number, 0);
-    // printf("step: initial\n");
-    //     for(double &t : temperature_v_initial){
-    //         printf("%lf ", t);
-    //     }
-    // printf("\n");
-
-    // global_data.simulation_step_time = 100;
     
-    global_data.simulation_time = 360;
+    global_data.simulation_time = 10000;
     global_data.simulation_step_time = 1;
     
     // global_data.print();
@@ -726,6 +760,9 @@ int main(int argc, char const *argv[])
             temp_info.avg - prev_temp_info.avg
         );
 
+        //* ZAPIS WYKAZU TEMPERATUR DO PLIKU
+        save_temp_info(temp_info, step, stime, temperature_out_data_file_path);
+
         
         
         // printf("step: %d\n", stime);
@@ -757,7 +794,7 @@ int main(int argc, char const *argv[])
         }
 
         //* STATIONARY BREAK
-        if(is_stationary(temperature_v, prev_temp_info.max, 0.01)){
+        if(is_stationary(temperature_v, prev_temp_info.max, STATIONARY_STATE_EPSILON)){
             printf("PROCES JEST USTALONY\nmax temp: %lf\n", temp_info.max);
             break;
         }
