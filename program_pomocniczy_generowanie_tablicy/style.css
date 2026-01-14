@@ -1,0 +1,15 @@
+body { font-family: sans-serif; padding: 20px; }
+#grid { display: grid; gap: 2px; margin-bottom: 20px; }
+.cell {
+    width: 40px; height: 40px;
+    background: #eee;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    cursor: pointer;
+}
+.cell.selected { background: #4caf50; color: white; }
+.cell.temp-selected { background: #81c784; color: white; } /* podczas przeciągania */
+#output { white-space: pre; background: #f5f5f5; padding: 10px; }
