@@ -1,3 +1,6 @@
+// #############################################
+//* ############### IMPORTS ###############
+// #############################################
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -19,6 +22,10 @@
 #include "solver.h"
 #include "vtu_parser.h"
 
+// #############################################
+//* ############### CONSTANTS ###############
+// #############################################
+
 // miedź
 const double COPPER_CONDUCTIVITY = 400.0;
 const double COPPER_DENSITY = 8940.0;
@@ -38,6 +45,10 @@ const double SCALE_FACTOR_Y = SCALE_FACTOR_X;
 
 const double MAX_TEMP_LIMIT = 100;
 
+// #############################################
+//* ############### MESH RELATIVE DATA ###############
+// #############################################
+
 // IHS I RESZTA RADIATORA
 std::vector<int> COPPER_ELEMENTS = {95,96,97,101,102,103,107,108,109,113,114,115,125,126,127,131,132,133,137,138,139,143,144,145,155,156,157,161,162,163,167,168,169,173,174,175,185,186,187,191,192,193,197,198,199,203,204,205,215,216,217,221,222,223,227,228,229,233,234,235,245,246,247,251,252,253,257,258,259,263,264,265,275,276,277,281,282,283,287,288,289,293,294,295,305,306,307,311,312,313,317,318,319,323,324,325,335,336,337,341,342,343,347,348,349,353,354,355,365,366,367,371,372,373,377,378,379,383,384,385,395,396,397,401,402,403,407,408,409,413,414,415,425,426,427,431,432,433,437,438,439,443,444,445,455,456,457,461,462,463,467,468,469,473,474,475,485,486,487,491,492,493,497,498,499,503,504,505,515,516,517,521,522,523,527,528,529,533,534,535,545,546,547,551,552,553,557,558,559,563,564,565,575,576,577,581,582,583,587,588,589,593,594,595,605,606,607,611,612,613,617,618,619,623,624,625,635,636,637,641,642,643,647,648,649,653,654,655,665,666,667,671,672,673,677,678,679,683,684,685,695,696,697,701,702,703,707,708,709,713,714,715,725,726,727,731,732,733,737,738,739,743,744,745,755,756,757,761,762,763,767,768,769,773,774,775,785,786,787,791,792,793,797,798,799,803,804,805,811,812,813,814,815,816,817,818,819,820,821,822,823,824,825,826,827,828,829,830,831,832,833,834,835,836,837,838,839,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,859,860,861,862,863,864,865,866,867,868,869,870,871,872,873,874,875,876,877,878,879,880,881,882,883,884,885,886,887,888,889,890,891,892,893,894,895,896,897,898,899,900};
 // std::vector<int> COPPER_ELEMENTS = {1
@@ -52,6 +63,10 @@ std::vector<int> INITIAL_HOT_ELEMENTS = {881,882,883,884,885,886,887,888,889,890
 // założenia programu:
 // element 4 węzłowy
 // liczba możliwych punktów całkowania: 2,3,4
+
+// #############################################
+//* ############### FUNCTIONS ###############
+// #############################################
 
 void calculate_jacobian_and_dN_dX_dY(Grid &grid, int npc){
     for(auto &element : grid.elements){
@@ -525,8 +540,15 @@ bool is_stationary(const std::vector<double>& temp_vec, double max_prev, double 
     return std::abs(current_max - max_prev) <= epsilon;
 }
 
+// #############################################
+//* ############### MAIN ###############
+// #############################################
+
 int main(int argc, char const *argv[])
 {
+    // ###############################################################
+    //*#                  CONSTANTS AND VARIABLES
+    // ###############################################################
     std::vector<int> air_elemnts_ids;
     const int GAUSS_I_POINTS = 2;
     auto GAUSS_POINTS_ARRAY = GaussQuad::points_2;
@@ -535,19 +557,22 @@ int main(int argc, char const *argv[])
     const bool DIFFUSION = false;
     const bool TIME_PART_AGREGATION = false;
 
-// printf("HTEAT: %lf\n", HEAT_GENERATION);
+    // printf("HTEAT: %lf\n", HEAT_GENERATION);
     // std::string RESULT_PATH = "results/1_4_4/";
     // std::string RESULT_PATH = "results/1_4_4_mix/";
     // std::string RESULT_PATH = "results/31_31/";
     std::string RESULT_PATH = "results/real_1/";
-    // ###############################################################
-    // #                            INIT
-    // ###############################################################
-    GaussQuad::init_universal_element(GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
+
     // const std::string data_file_path = "./grid_data/Test1_4_4.txt";
     // const std::string data_file_path = "./grid_data/Test2_4_4_MixGrid.txt";
     // const std::string data_file_path = "./grid_data/Test3_31_31_kwadrat.txt";
     const std::string data_file_path = "./real_problem/real_4_kolumny.txt";
+
+    // ###############################################################
+    //*#                            INIT
+    // ###############################################################
+
+    GaussQuad::init_universal_element(GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
     GaussQuad::uniEl.print(GAUSS_I_POINTS);
     
     GlobalData global_data;
@@ -569,11 +594,9 @@ int main(int argc, char const *argv[])
     calculate_jacobian_and_dN_dX_dY(grid, GAUSS_I_POINTS);
 
     // ###############################################################
-    // #                            SIM
+    //*#                       SIMULATION
     // ###############################################################
-
-    // petla symulacji
-
+    
     //* SETUP INITIAL TEMPERATURE
     // std::vector<double> temperature_v_initial = std::vector<double>(global_data.node_number,global_data.initial_temperature);
     std::vector<double> temperature_v_initial = std::vector<double>(global_data.node_number, global_data.tot);
