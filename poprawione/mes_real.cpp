@@ -84,7 +84,7 @@ const std::vector<int> INITIAL_HOT_ELEMENTS = {881,882,883,884,885,886,887,888,8
 //* ############### MESH RELATIVE DATA ###############
 // #############################################
 
-//* USTAWIENIE ILOSCI KOLUMN
+//! USTAWIENIE ILOSCI KOLUMN
 std::vector<int> COPPER_ELEMENTS = COPPER_ELEMENTS_4;
 
 // #############################################
@@ -607,10 +607,7 @@ bool is_stationary(const std::vector<double>& temp_vec, double max_prev, double 
     return std::abs(current_max - max_prev) <= epsilon;
 }
 
-void save_temp_info(const TempInfo& info,
-                    int step,
-                    double stime,
-                    const std::string& file_path)
+void save_temp_info(const TempInfo& info, int step, double stime, const std::string& file_path)
 {
     std::ofstream file(file_path, std::ios::app); // dopisuj
 
@@ -636,9 +633,9 @@ void trunc_file(const std::string& file_path)
     file.close();
 }
 
-void save_temperature_vec_to_file(const std::vector<double>& temp_vec, const std::string& file_path){
+// void save_temperature_vec_to_file(const std::vector<double>& temp_vec, const std::string& file_path){
 
-}
+// }
 
 // #############################################
 //* ############### MAIN ###############
@@ -718,38 +715,14 @@ int main(int argc, char const *argv[])
     // global_data.print();
     int step = 0;
     for(double stime = 0; stime <= global_data.simulation_time; stime+=global_data.simulation_step_time){
-        // // CAŁY CZAS USTALA TEMPERATURE OD PROCESORA
-        // for(int& el_i : INITIAL_HOT_ELEMENTS){
-        //     for(int& node_id : grid.elements[el_i-1].node_ids){
-        //         temperature_v_initial[node_id-1] = 100;
-        //     }
-        // }
-
         calculate_H_and_C_matrix(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
-        // print_H_from_elements(grid);
-        // print_C_from_elements(grid);
-
         calculate_HBC(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
-
         calculate_P(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
-        // print_P_from_elements(grid);
 
         agregate(grid, global_data, equationData);
-
-        // print_H(equationData);
-
-        
-        // print_C(equationData);
         
         if(TIME_PART_AGREGATION)
             agregate_time_part(grid, global_data, equationData, temperature_v_initial);
-
-        // #######################
-        // printf("Po agregacji z czasem\n");
-        // print_H(equationData);
-        // print_P(equationData);
-        // #######################
-
         
         temperature_v = solveLinearSystem(equationData.H, equationData.P);
 
@@ -767,13 +740,6 @@ int main(int argc, char const *argv[])
         //* ZAPIS WYKAZU TEMPERATUR DO PLIKU
         save_temp_info(temp_info, step, stime, temperature_out_data_file_path);
 
-        
-        
-        // printf("step: %d\n", stime);
-        // for(double &t : temperature_v){
-        //     printf("%lf ", t);
-        // }
-        // printf("\n");
 
         temperature_v_initial = temperature_v;
 
@@ -788,7 +754,6 @@ int main(int argc, char const *argv[])
         step++;
 
         printf("step: %d time: %lf\n", step, stime);
-
 
 
         //* MAX TEMPERATURE BREAK
