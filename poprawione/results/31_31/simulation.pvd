@@ -21,6 +21,5 @@
     <DataSet timestep="17" file="step_017.vtu"/>
     <DataSet timestep="18" file="step_018.vtu"/>
     <DataSet timestep="19" file="step_019.vtu"/>
-    <DataSet timestep="20" file="step_020.vtu"/>
   </Collection>
 </VTKFile>

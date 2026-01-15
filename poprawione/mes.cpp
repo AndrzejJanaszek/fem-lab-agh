@@ -15,6 +15,7 @@
 #include "gauss.h"
 #include "solver.h"
 #include "vtu_parser.h"
+#include <numeric>
 
 // założenia programu:
 // element 4 węzłowy
@@ -281,7 +282,9 @@ void print_H_from_elements(Grid grid){
     printf("H:\n");
     for(auto& row : H){
         for(double& el : row){
-            printf("%lf ", el);
+            // printf("%lf ", el);
+            std::cout << el << " ";
+
         }
         printf("\n");
     }
@@ -328,10 +331,11 @@ void print_P_from_elements(Grid grid){
 
 
 void print_H(EquationData ed){
-    printf("H:\n");
+    printf("HG+Hbc:\n");
     for(auto& row : ed.H){
         for(double& el : row){
-            printf("%lf ", el);
+            // printf("%.3lf ", el);
+            std::cout << el << " ";
         }
         printf("\n");
     }
@@ -341,18 +345,85 @@ void print_C(EquationData ed){
     printf("C:\n");
     for(auto& row : ed.C){
         for(double& el : row){
-            printf("%lf ", el);
+            // printf("%lf ", el);
+            std::cout << el << " ";
         }
         printf("\n");
     }
 }
 
 void print_P(EquationData ed){
-    printf("P:\n");
+    printf("[P]:\n");
     for(double& el : ed.P){
-        printf("%lf ", el);
+        // printf("%lf ", el);
+        std::cout << el << " ";
     }
     printf("\n");
+}
+
+struct TempInfo
+{
+    double min;
+    double max;
+    double avg;
+};
+
+TempInfo print_temp_info(const std::vector<double>& temp_vec, double min_temp_condition) {
+    TempInfo res;
+    res.min = 0;
+    res.max = 0;
+    res.avg = 0;
+
+    if (temp_vec.empty()) return res;
+
+    auto [min_it, max_it] = std::minmax_element(temp_vec.begin(), temp_vec.end());
+    double avg = std::accumulate(temp_vec.begin(), temp_vec.end(), 0.0) / temp_vec.size();
+
+    std::cout << "min: " << *min_it
+              << " max: " << *max_it
+              << " avg: " << avg << '\n';
+
+    std::cout << "IDs with temp < " << min_temp_condition << ": ";
+    bool found = false;
+    for (size_t i = 0; i < temp_vec.size(); ++i) {
+        if (temp_vec[i] < min_temp_condition) {
+            std::cout << i << " ";
+            found = true;
+        }
+    }
+    if (!found) std::cout << "none";
+    std::cout << '\n';
+
+    res.min = *min_it;
+    res.max = *max_it;
+    res.avg = avg;
+    return res;
+}
+
+void save_temp_info(const TempInfo& info, int step, double stime, const std::string& file_path)
+{
+    std::ofstream file(file_path, std::ios::app); // dopisuj
+
+    if (!file.is_open()) {
+        throw std::runtime_error("Cannot open file: " + file_path);
+    }
+
+    file << step  << ';'
+         << stime << ';'
+         << info.min << ';'
+         << info.max << ';'
+         << info.avg << '\n';
+
+    file.close();
+}
+
+void trunc_file(const std::string& file_path)
+{
+    std::ofstream file(file_path, std::ios::trunc);
+    if (!file.is_open()) {
+        throw std::runtime_error("Cannot truncate file: " + file_path);
+    }
+    file.close();
 }
 
 
@@ -370,6 +441,9 @@ int main(int argc, char const *argv[])
     // const std::string data_file_path = "./grid_data/Test1_4_4.txt";
     // const std::string data_file_path = "./grid_data/Test2_4_4_MixGrid.txt";
     const std::string data_file_path = "./grid_data/Test3_31_31_kwadrat.txt";
+
+    const std::string SAVE_TEMP_PATH = "temperature_results/siatki/tmp_remove.txt";
+
     GaussQuad::uniEl.print(GAUSS_I_POINTS);
     
     GlobalData global_data;
@@ -387,22 +461,23 @@ int main(int argc, char const *argv[])
     // #                            SIM
     // ###############################################################
 
+    // * CZYSZCZENIE PLIKU Z DANYMI TEMP
+    trunc_file(SAVE_TEMP_PATH);
+
+
     // petla symulacji
     std::vector<double> temperature_v_initial = std::vector<double>(global_data.node_number,global_data.initial_temperature);
     std::vector<double> temperature_v;
-    printf("step: initial\n");
-        for(double &t : temperature_v_initial){
-            printf("%lf ", t);
-        }
-    printf("\n");
 
-    // global_data.simulation_step_time = 100;
+    TempInfo temp_info;
+
+    // global_data.simulation_step_time = 55;
     int step = 0;
-    for(int stime = 0; stime <= global_data.simulation_time; stime+=global_data.simulation_step_time){
+    for(double stime = global_data.simulation_step_time; stime <= global_data.simulation_time; stime+=global_data.simulation_step_time){
         calculate_H_and_C_matrix(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
         // print_H_from_elements(grid);
         // print_C_from_elements(grid);
-
+        
         calculate_HBC(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
 
         calculate_P(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
@@ -426,17 +501,18 @@ int main(int argc, char const *argv[])
         
         temperature_v = solveLinearSystem(equationData.H, equationData.P);
         
-        printf("step: %d\n", stime);
-        for(double &t : temperature_v){
-            printf("%lf ", t);
-        }
-        printf("\n");
+        // printf("step: %d\n", stime);
+        // for(double &t : temperature_v){
+        //     printf("%lf ", t);
+        // }
+        // printf("\n");
 
         temperature_v_initial = temperature_v;
 
-        // //* JEDNA ITERACJA BREAK
-        // break;
-
+        temp_info = print_temp_info(temperature_v, 0);
+        save_temp_info(temp_info, step, stime, SAVE_TEMP_PATH);
+        
+        
         //* ZAPIS SYMULACJI DO PLIKU - ZAPIS KORKU SYMULACJI
         std::stringstream ss;
         ss << RESULT_PATH
@@ -446,6 +522,9 @@ int main(int argc, char const *argv[])
 
         writeVTU(ss.str(), grid, temperature_v);
         step++;
+
+        //* JEDNA ITERACJA BREAK
+        // break;
     }
 
     //* ZAPIS SYMULACJI DO PLIKU - OPIS KROKÓW SYMULACJI

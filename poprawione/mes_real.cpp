@@ -710,7 +710,7 @@ int main(int argc, char const *argv[])
     
     // global_data.print();
     int step = 0;
-    for(double stime = 0; stime <= global_data.simulation_time; stime+=global_data.simulation_step_time){
+    for(double stime = global_data.simulation_step_time; stime <= global_data.simulation_time; stime+=global_data.simulation_step_time){
         calculate_H_and_C_matrix(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
         calculate_HBC(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
         calculate_P(grid, global_data, GAUSS_POINTS_ARRAY, GAUSS_I_POINTS);
