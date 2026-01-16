@@ -53,7 +53,7 @@ const double STATIONARY_STATE_EPSILON = 0.001;
 
  // W/m3
  // 13mm*13mm*1.3mm / 1000^3 --- mm3 => m3
-const double HEAT_GENERATION = 2.349 / (13*13*1.3 / (1000*1000*1000));
+const double HEAT_GENERATION = 2.175 / (13*13*1.3 / (1000*1000*1000));
 
 const double SCALE_FACTOR_X = 0.39;
 // const double SCALE_FACTOR_X = 1;
@@ -463,7 +463,7 @@ void print_P(EquationData& ed){
 }
 
 
-void scale_mesh(Grid& grid, double scale_factor_x, double scale_factor_y){
+void scale_mesh(Grid& grid, const double& scale_factor_x, const double& scale_factor_y){
     for(auto& node : grid.nodes){
         node.x = node.x * scale_factor_x;
         node.y = node.y * scale_factor_y;
@@ -665,7 +665,7 @@ int main(int argc, char const *argv[])
     // const std::string data_file_path = "./grid_data/Test3_31_31_kwadrat.txt";
     const std::string data_file_path = "./real_problem/real_4_kolumny.txt";
 
-    const std::string temperature_out_data_file_path = "temperature_results/real.txt";
+    const std::string temperature_out_data_file_path = "temperature_results/real_4k_diff_step1.txt";
 
     // ###############################################################
     //*#                            INIT
@@ -705,7 +705,7 @@ int main(int argc, char const *argv[])
 
     std::vector<double> temperature_v = std::vector<double>(global_data.node_number, 0);
     
-    global_data.simulation_time = 20;
+    global_data.simulation_time = 2000;
     global_data.simulation_step_time = 1;
     
     // global_data.print();
