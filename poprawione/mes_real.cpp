@@ -49,11 +49,11 @@ const double AIR_CONDUCTIVITY = 0.025368;
 const double AIR_DENSITY = 1.20435;
 const double AIR_SPECIFIC_HEAT = 1006.55;
 
-const double STATIONARY_STATE_EPSILON = 0.001;
+const double STATIONARY_STATE_EPSILON = 0.001;  // [K/s] lub [C/s]
 
  // W/m3
  // 13mm*13mm*1.3mm / 1000^3 --- mm3 => m3
-const double HEAT_GENERATION = 2.175 / (13*13*1.3 / (1000*1000*1000));
+const double HEAT_GENERATION = 2.175 / (13*13*1.3 / (1000*1000*1000)); // [W/m3]
 
 const double SCALE_FACTOR_X = 0.39;
 // const double SCALE_FACTOR_X = 1;
@@ -85,7 +85,7 @@ const std::vector<int> INITIAL_HOT_ELEMENTS = {881,882,883,884,885,886,887,888,8
 // #############################################
 
 //! USTAWIENIE ILOSCI KOLUMN
-std::vector<int> COPPER_ELEMENTS = COPPER_ELEMENTS_4;
+std::vector<int> COPPER_ELEMENTS = COPPER_ELEMENTS_1;
 
 // #############################################
 //* ############### FUNCTIONS ###############
@@ -599,12 +599,12 @@ bool is_temperature_limit(const std::vector<double>& temp_vec, double max_temp) 
                        [max_temp](double t){ return t > max_temp; });
 }
 
-bool is_stationary(const std::vector<double>& temp_vec, double max_prev, double epsilon) {
+bool is_stationary(const std::vector<double>& temp_vec, double max_prev, double epsilon, double step) {
     if (temp_vec.empty()) return true; // jeśli brak danych, uznajemy za stacjonarne
 
     double current_max = *std::max_element(temp_vec.begin(), temp_vec.end());
 
-    return std::abs(current_max - max_prev) <= epsilon;
+    return std::abs(current_max - max_prev) <= (epsilon/step);
 }
 
 void save_temp_info(const TempInfo& info, int step, double stime, const std::string& file_path)
@@ -651,7 +651,7 @@ int main(int argc, char const *argv[])
     auto GAUSS_POINTS_ARRAY = GaussQuad::points_2;
     TempInfo prev_temp_info;   // dla sprawdzenia czy proces jest ustalony
 
-    const bool DIFFUSION = true;
+    const bool DIFFUSION = false;
     const bool TIME_PART_AGREGATION = true;
 
     // printf("HTEAT: %lf\n", HEAT_GENERATION);
@@ -665,7 +665,7 @@ int main(int argc, char const *argv[])
     // const std::string data_file_path = "./grid_data/Test3_31_31_kwadrat.txt";
     const std::string data_file_path = "./real_problem/real_4_kolumny.txt";
 
-    const std::string temperature_out_data_file_path = "temperature_results/real_4k_diff_step1.txt";
+    const std::string temperature_out_data_file_path = "temperature_results/real_1k_step100_zbieganie.txt";
 
     // ###############################################################
     //*#                            INIT
@@ -705,8 +705,8 @@ int main(int argc, char const *argv[])
 
     std::vector<double> temperature_v = std::vector<double>(global_data.node_number, 0);
     
-    global_data.simulation_time = 2000;
-    global_data.simulation_step_time = 1;
+    global_data.simulation_time = 20000;
+    global_data.simulation_step_time = 100;
     
     // global_data.print();
     int step = 0;
@@ -762,7 +762,7 @@ int main(int argc, char const *argv[])
         }
 
         //* STATIONARY BREAK
-        if(is_stationary(temperature_v, prev_temp_info.max, STATIONARY_STATE_EPSILON)){
+        if(is_stationary(temperature_v, prev_temp_info.max, STATIONARY_STATE_EPSILON, global_data.simulation_step_time)){
             printf("PROCES JEST USTALONY\nmax temp: %lf\n", temp_info.max);
             break;
         }
