@@ -1,0 +1,1 @@
+programy pomocnicze - wygenerowane LLM - chatGPT
