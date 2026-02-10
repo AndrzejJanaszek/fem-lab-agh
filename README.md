@@ -12,6 +12,7 @@ The extended version (`mes_real.cpp`) for a real-world problem enhances the prog
 The program saves simulation data to `.pvd` / `.vtu` files, allowing the simulation to be analyzed over time and visualized.
 
 For transient simulations, the program stops when either the maximum temperature is reached or the process becomes steady (i.e., the change in maximum temperature between simulation steps falls below a specified epsilon).
+
 ### Temperature distributions for the steady-state process in test meshes (basic version of the program) together with the mesh schematics.
 
 <div style="display: flex; justify-content: center; gap: 10px;">
@@ -74,7 +75,7 @@ The mesh is scaled so that the dimensions of the CPU die and the IHS are as clos
 The IHS typically has dimensions of 40×40 mm, while the CPU die measures 13×13 mm.
 In the simulation, the side length of a single element is 1.3 mm, resulting in a CPU die size of 13 mm and an IHS size of 39 mm.
 
-#### Schematy siatki dla 3 scenariuszy (1, 2 i 4 żeber radiatora).
+#### Mesh schematics for 3 scenarios (1, 2, and 4 heatsink fins)
 <div style="display: flex; justify-content: center; gap: 10px;">
   <img src="./others/sprawozdanie/img/schemat_1k_radiator.png" width="30%">
   <img src="./others/sprawozdanie/img/schemat_2k_radiator.png" width="30%">
@@ -82,7 +83,7 @@ In the simulation, the side length of a single element is 1.3 mm, resulting in a
 </div>
 
 
-#### Rozkład temperatur dla procesu ustalonego
+#### Temperature distribution for the steady-state process
 <div style="display: flex; justify-content: center; gap: 10px;">
   <img src="./others/sprawozdanie/img/radiator_1zebra_ustalony.png" width="30%">
   <img src="./others/sprawozdanie/img/radiator_2zebra_ustalony.png" width="30%">
