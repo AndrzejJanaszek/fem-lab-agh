@@ -2,7 +2,7 @@
 
 [> Wersja polska](./README.PL.md) 
 
-FEM program for simulating thermal processes in 2D.
+2D FEM program for simulating thermal processes, developed for educational purposes during the FEM course at AGH
 The basic version of the program (`mes.cpp`) allows simulation of both steady-state and transient processes for a single material type with specified boundary conditions.
 
 The extended version (`mes_real.cpp`) for a real-world problem enhances the program by enabling the addition of a second material, inclusion of a heat source, and application of artificial diffusion*.

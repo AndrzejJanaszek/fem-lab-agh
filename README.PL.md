@@ -2,7 +2,7 @@
 
 [> English version](./README.md) 
 
-Program MES do symulacji procesów cieplnych w 2 wymiarach. 
+Program MES 2D do symulacji procesów cieplnych, opracowany w celach edukacyjnych w ramach kursu MES na AGH.
 Bazowa wersja programu zakłada możliwość symulacji stacjonarnego i niestacjonarnego procesu dla jednego typu materiału z zadanymi warunkami brzegowymi.
 Wersja dla problemu rzeczywistego rozbudowuje program o możliwość dodania drugiego materiału, dodania źródła ciepła oraz możliwość zastosowania sztucznej dyfuzji*.
 
